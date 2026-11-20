@@ -1,11 +1,11 @@
 # MANIFEST
 
-72 files outside the source snapshot, 294952 bytes.
+72 files outside the source snapshot, 294909 bytes.
 
 Source tree: `src/gpac-readonly/` — 1289 files, content fingerprint `tree-3fb52327008566a2` (sha256 over `sha256(file)  ./path` lines, sorted, excluding .git).
 
 ```
-87b411d1e3eb7aa562db0b2b6c6c607a1bd9acddd2529de05ee25a71c74048cf      8602  MANIFEST.md
+60c897703110c34ed43dc1f64d96a001293b115eb529e684070f64ee7ec9b738      8602  MANIFEST.md
 a28299d202c9a0f03b1e836c127e50f30e2c0fc7a21e54c64f8c493be5e4c4c7     11558  README.md
 1b0a43a23a1e1f7a2e3f94fcb5f3e19b1c3c70fb994fc529cdd919f6408caea7     12110  SPECIFICATION.md
 3d68d6fd35ac61b331671f387ce2fd52d6e79e0525acf127932487bdbda2622b      3207  image/Dockerfile
@@ -73,7 +73,7 @@ ce144b7ebbca1d5ce1b69b04f72de8d7697e4c0d4d6d2fc496022abbec19e7cc      2100  repo
 9b5c46d816e7a62c911ccee847028aba77761d88550b483bfe4324450e0293fa       576  scripts/fuzz_parse.c
 5c1f38bcf4b72efc589ce37e4183e5e1bc561d5627cd954c0f5dee372a02bb9e       630  scripts/fuzz_probe_analyze.c
 46ff6df3f2f155065dee0734098607b4c8f1e19c9ddbcaf4a0eb80b8a3113f92     10647  scripts/lib.sh
-92013307dfec88a0d92959ef8c1c13fd006c07f34acc2826c2be1dff17d4da4d      1234  scripts/standalone_main.c
+743ae89f614ce3d22fc4a59ddd3fdbaa5273a6fb16839c3d2537717f310964e1      1191  scripts/standalone_main.c
 f40c535935e2190ae60e833781b443e295fc84e7780df4ab27d747906ac624c9      2315  scripts/verify-one-by-one.sh
 aed653641beb1c266605e9a0bfae71876d65a7c515cbefa1d1fb4f77edd473f0      3839  scripts/verify-one.sh
 eed682cf6ba1ba46fa35c9f6083742e755376455c5be600c79341a89323d658b      2276  scripts/verify.sh
