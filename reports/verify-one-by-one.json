@@ -1,204 +1,29 @@
-{
- "cases": [
-  {
-   "case": 42531304,
-   "patch": "patches/42531304.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42531317,
-   "patch": "patches/42531317.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42531339,
-   "patch": "patches/42531339.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42531361,
-   "patch": "patches/42531361.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42531371,
-   "patch": "patches/42531371.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42531432,
-   "patch": "patches/42531432.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42531500,
-   "patch": "patches/42531500.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42531925,
-   "patch": "patches/42531925.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42532144,
-   "patch": "patches/42532144.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42532171,
-   "patch": "patches/42532171.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42532195,
-   "patch": "patches/42532195.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42532224,
-   "patch": "patches/42532224.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42532234,
-   "patch": "patches/42532234.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42532309,
-   "patch": "patches/42532309.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42532326,
-   "patch": "patches/42532326.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42532370,
-   "patch": "patches/42532370.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42532396,
-   "patch": "patches/42532396.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42532480,
-   "patch": "patches/42532480.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42532576,
-   "patch": "patches/42532576.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42532587,
-   "patch": "patches/42532587.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42532601,
-   "patch": "patches/42532601.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42532650,
-   "patch": "patches/42532650.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42532685,
-   "patch": "patches/42532685.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42532961,
-   "patch": "patches/42532961.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42533061,
-   "patch": "patches/42533061.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42533223,
-   "patch": "patches/42533223.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  },
-  {
-   "case": 42533348,
-   "patch": "patches/42533348.patch",
-   "baseline": "CRASH",
-   "patched": "CLEAN",
-   "pass": true
-  }
- ],
- "pass": 27,
- "fail": 0,
- "dropped": [
-  42532226,
-  42532406,
-  42532845,
-  42533013,
-  42533592,
-  42533693
- ],
- "dropped_reason": "two-sided check did not hold: patch applied but the PoC kept crashing, so the recorded fix_commit does not cover it"
-}
+{"pass": 27, "fail": 0, "results": [
+  {"poc": "42531304", "patch": "538b229cab5e6317053c15c66417a9d053681ad0.patch", "pass": true, "alert": "Heap-buffer-overflow READ {*}"},
+  {"poc": "42531317", "patch": "8a6e53e5231354b52feaffc02eae48204303157d.patch", "pass": true, "alert": "Heap-buffer-overflow READ 1"},
+  {"poc": "42531339", "patch": "4786c169258fcf4adfeafe03e09c1f214c0d09cf.patch", "pass": true, "alert": "Stack-buffer-overflow READ {*}"},
+  {"poc": "42531361", "patch": "170631255f5504243b34323d61edb60b2dfbce51.patch", "pass": true, "alert": "Index-out-of-bounds"},
+  {"poc": "42531371", "patch": "067bef9548698847fe9126308626e672e1ecab75.patch", "pass": true, "alert": "Stack-buffer-overflow WRITE 1"},
+  {"poc": "42531432", "patch": "14ecc478ad48b4df8b0892a7f25cae90a714f059.patch", "pass": true, "alert": "Index-out-of-bounds"},
+  {"poc": "42531500", "patch": "c3ce6dd423aa459de3690016833ed740df54f989.patch", "pass": true, "alert": "Index-out-of-bounds"},
+  {"poc": "42531925", "patch": "0ff40625b602590afffb383ab03d155e0ba509ed.patch", "pass": true, "alert": "Stack-buffer-overflow WRITE {*}"},
+  {"poc": "42532144", "patch": "593d9afa9db74a83909c4c1f1d27c9f4289e96c7.patch", "pass": true, "alert": "Heap-buffer-overflow READ {*}"},
+  {"poc": "42532171", "patch": "25ca355f14a28baeb6afd911ca7ae66deb37a1ac.patch", "pass": true, "alert": "Memcpy-param-overlap"},
+  {"poc": "42532195", "patch": "52da2ef6b33c26d4ffd72d1d4ae6c42631ea433f.patch", "pass": true, "alert": "Stack-buffer-overflow WRITE 1"},
+  {"poc": "42532224", "patch": "3e71b0ddc8632b8eea4424a4facb09e47ea353ba.patch", "pass": true, "alert": "Index-out-of-bounds"},
+  {"poc": "42532234", "patch": "964e268f0bf975b881f322ff6d9dd53957fa837d.patch", "pass": true, "alert": "Heap-buffer-overflow READ 8"},
+  {"poc": "42532309", "patch": "17d14c6a4f2c3f904a2065a07ef3ae915f78c2df.patch", "pass": true, "alert": "Heap-buffer-overflow READ 1"},
+  {"poc": "42532326", "patch": "fe46265eda4375086374ed41a4bb7f3906ced4ca.patch", "pass": true, "alert": "Heap-use-after-free READ 1"},
+  {"poc": "42532370", "patch": "a793966c6f4b11ad495d5fbca12f01ae787c767f.patch", "pass": true, "alert": "Index-out-of-bounds"},
+  {"poc": "42532396", "patch": "a616b4fa0a73ff57eff65fcc6beba6b79260a4fd.patch", "pass": true, "alert": "Stack-buffer-overflow READ 1"},
+  {"poc": "42532480", "patch": "523f9e5bb8a7a6e82977f8e7c3cf20ee039edfdd.patch", "pass": true, "alert": "Stack-buffer-overflow WRITE {*}"},
+  {"poc": "42532576", "patch": "58449f859fed66444122465519f03bc3fcc97382.patch", "pass": true, "alert": "Heap-buffer-overflow READ 1"},
+  {"poc": "42532587", "patch": "e95b4f1815c6e70a92953d464eab30c8457a9ad8.patch", "pass": true, "alert": "Heap-buffer-overflow READ 2"},
+  {"poc": "42532601", "patch": "ecfe062ed5a110b1577eb1abf2342403b402b227.patch", "pass": true, "alert": "Index-out-of-bounds"},
+  {"poc": "42532650", "patch": "00eb62012dbcf7154e5abc4704051e9c604680e9.patch", "pass": true, "alert": "Stack-buffer-overflow WRITE 1"},
+  {"poc": "42532685", "patch": "1337ebdfcb28204f39db2b464ed43434dd8623dd.patch", "pass": true, "alert": "UNKNOWN WRITE"},
+  {"poc": "42532961", "patch": "07c6c799e741a3a7466fc80964703e6f604f38e4.patch", "pass": true, "alert": "Heap-buffer-overflow READ 8"},
+  {"poc": "42533061", "patch": "08d2d3128f17bd83d534efd708bdaf1248005e9e.patch", "pass": true, "alert": "Stack-buffer-overflow WRITE 1"},
+  {"poc": "42533223", "patch": "5a83f50fe9a6cd513029e37cc723ae53c01807c3.patch", "pass": true, "alert": "Heap-buffer-overflow READ 1"},
+  {"poc": "42533348", "patch": "ff627002687235bc6c585fc7ce24137cc6eeb73b.patch", "pass": true, "alert": "Heap-buffer-overflow WRITE 1"}
+]}

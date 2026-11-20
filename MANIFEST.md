@@ -1,94 +1,83 @@
-# MANIFEST — gpac-vul
+# MANIFEST
 
-生成方式：`python runs/gpac-20261119/check_package.py` 校验本表；本文件由脚本按磁盘内容重算。
+72 files outside the source snapshot, 284837 bytes.
 
-## 源码快照
+Source tree: `src/gpac-readonly/` — 1289 files, content fingerprint `tree-3fb52327008566a2` (sha256 over `sha256(file)  ./path` lines, sorted, excluding .git).
 
-| 项 | 值 |
-| --- | --- |
-| 目录 | `src/gpac-readonly/` |
-| 文件数 | 1289 |
-| 内容指纹 | `tree-3fb52327008566a2` |
-| 上游 | gpac `b890f1c443dbe1f941cd326d4473ce7ddef8e256`，`git archive` 导出后统一为 LF |
+```
+4f5b8aa670e56abe2d48c4e5f407b23ed8fd34319824711cd1b3092dec0d8580      8602  MANIFEST.md
+775dcb346903c76a2ba99a3cd02908df4f10233701250717ea847734de94a841      4561  README.md
+69cd73216563fb3391a1f11e49be30c62f2cc801c9e05d4ef466b21522d9cb5b      9544  SPECIFICATION.md
+3d68d6fd35ac61b331671f387ce2fd52d6e79e0525acf127932487bdbda2622b      3207  image/Dockerfile
+6d91425fa2097b63d5ce8a9ec0328a44228ccf83c963a02c603bf211f69955c5      5539  payload/cases.tsv
+39f1d93483f261558b83fa092f949f02d11e4f7994ff2ab80eb83bd9dff0a616      6231  payload/patch-index.json
+4233d08b01a956c40945405c7010cc1f88ad005c122e0c296fb12454f14de2eb     65154  payload/vulnerabilities.json
+afd58e704a79a39703cffbaf8ed2aae7833a0265b234284be4821b4fe05a7b7f       831  payload/patches/00eb62012dbcf7154e5abc4704051e9c604680e9.patch
+eda2bddd7b7c2c2725420b3b7ba437d3899e67199ac49f40eb2d129ac3193500       817  payload/patches/067bef9548698847fe9126308626e672e1ecab75.patch
+0e9c51ef8de9ea8d4ddf8c036748d9bfe58ea6e249da238cbdc09419838ea82b       740  payload/patches/07c6c799e741a3a7466fc80964703e6f604f38e4.patch
+819f771868dcbcb83dd14494f6a84f4017263443205b334e75d930b05a4d684a       924  payload/patches/08d2d3128f17bd83d534efd708bdaf1248005e9e.patch
+149227dee3a721bb871906876caa93861234bbd79a1a3d420a402007e884a990      1142  payload/patches/0ff40625b602590afffb383ab03d155e0ba509ed.patch
+86ab8c737c4c427e60f855666cd978245637fff3eb673496e5ad017744cc37b6      1484  payload/patches/1337ebdfcb28204f39db2b464ed43434dd8623dd.patch
+c2887766b0febe9f88c214ccaafbc466f57eb0bde28e99ef70105c20aca19f37       602  payload/patches/14ecc478ad48b4df8b0892a7f25cae90a714f059.patch
+515cd15eb021eaec40982256138137fb4276161b01ccae74237c32d9e526eb96      1144  payload/patches/170631255f5504243b34323d61edb60b2dfbce51.patch
+9ffdffb2c596f33843b5a5b11595b55facb27efb83851b904456e3185df80ba1       442  payload/patches/17d14c6a4f2c3f904a2065a07ef3ae915f78c2df.patch
+f92bfac2730f72725a7d26bfcaac1658936d326b3fba34d7552e28f455cf4c57       788  payload/patches/25ca355f14a28baeb6afd911ca7ae66deb37a1ac.patch
+4f0f7b8137af84de0deb65cd17862380a5fc89457090cd990665ecec18173071      2204  payload/patches/3e71b0ddc8632b8eea4424a4facb09e47ea353ba.patch
+6807ed31e35dc442982910a804487293fb09fb31591e4cad84c91dcefc28b24b       680  payload/patches/4786c169258fcf4adfeafe03e09c1f214c0d09cf.patch
+f57982d396355a97f461d346cd2a855eacaa2317eb0929bcfc6b1a982f7a141d      1816  payload/patches/523f9e5bb8a7a6e82977f8e7c3cf20ee039edfdd.patch
+7222aa6b4a316f04cc7c60a1989af8a30ca5b2daad6d8241a1a2a795cc99b14a       421  payload/patches/52da2ef6b33c26d4ffd72d1d4ae6c42631ea433f.patch
+2db6c800c803e0aea885a481cc91a80c1935bf1d69f66a3440f6dcde85dca969       570  payload/patches/538b229cab5e6317053c15c66417a9d053681ad0.patch
+b48fb3c50472d0f8d34854559fa18642823b8947e04fd871c922e1d459e7a89b       655  payload/patches/58449f859fed66444122465519f03bc3fcc97382.patch
+8f908d83093f2a58ff120ca60daac680a2041774008543b868cd9c42a1bc54eb      2484  payload/patches/593d9afa9db74a83909c4c1f1d27c9f4289e96c7.patch
+fc0d41c30429c192a80f80886f1dc61d485651bc8bf1b8cd199315a3bad11895       524  payload/patches/5a83f50fe9a6cd513029e37cc723ae53c01807c3.patch
+8b509a9d3123ae953351703c35cc58366f35afca950eafbbd30847d35f2debe7       454  payload/patches/8a6e53e5231354b52feaffc02eae48204303157d.patch
+2881644f51cf8bf0977f4284685f5ab3c677b38f83ce378405ff88657bbf0d70       934  payload/patches/964e268f0bf975b881f322ff6d9dd53957fa837d.patch
+054520259263cde1d6b425edfed2acde641229c7301ee294eff4d60998093f00       845  payload/patches/a616b4fa0a73ff57eff65fcc6beba6b79260a4fd.patch
+1b332fea4e683281b795399b7e747ab7e15e5aeec0fc4b9823ab1359faa705d7       889  payload/patches/a793966c6f4b11ad495d5fbca12f01ae787c767f.patch
+8ecb442f91b937f722fe8d693789a617ac49ad405ef91d392ab30c815bc18562       969  payload/patches/c3ce6dd423aa459de3690016833ed740df54f989.patch
+7566e8dd3c959ee51f001e9d97b1224d98908b1d0bfcdabb9511b387582c1ece       559  payload/patches/e95b4f1815c6e70a92953d464eab30c8457a9ad8.patch
+ea1cdd1cfa1db59b371c8d1154afd322d48ef0877d66431e1861f1abc5be91bd       716  payload/patches/ecfe062ed5a110b1577eb1abf2342403b402b227.patch
+f136e6fc8873208e844f468f1ef63cd28398ae67d5186dfef3457212c9ed706f      1108  payload/patches/fe46265eda4375086374ed41a4bb7f3906ced4ca.patch
+2b9639f80b574648ff8185076ffa51632c7795c30aad85f51579444e3cdd8bbd       607  payload/patches/ff627002687235bc6c585fc7ce24137cc6eeb73b.patch
+a3db26eb4d0a4dfd865cfae882a50e2c538cf0da0f50bfb8236eb1238dbfe4fd      5001  payload/pocs/42531304/poc
+de85814ad9cb4769a090f611dc4f82e7aa8aca812c00aa095d4ad459e8545880         8  payload/pocs/42531317/poc
+735e413423b64b7b07e7b3e41947ae781ef319a9f6dea0b7155891a2b1b66b1e      4941  payload/pocs/42531339/poc
+940fa45214968e17c3d82febe80b57206774fd2c6c3ea828e118fd3150ac5026       110  payload/pocs/42531361/poc
+532f47a1d14f9a8c45971ea4231617ad5cc0e5acc2d15a0e4cfd37f520901546      3091  payload/pocs/42531371/poc
+d85ba81ec1ac703277491793f472a12d36fb677f1130825853668f8af24a2cd8      1183  payload/pocs/42531432/poc
+86864c6ae5a63d3ed00b2f103ae49f6137293cdefd98868cda6af73e16a7c4d2     16384  payload/pocs/42531500/poc
+265d093be4b5668e56eb1b9c040f2a2d804fd1af0ff9399511073fbec1296e41       117  payload/pocs/42531925/poc
+4a0a78af1d992eb4767fb8beeff2f6564c5db430f383b68bfc836450b19b77fe      1210  payload/pocs/42532144/poc
+9c5d6317feb836f6d2263a84567d7245b5c55a9fda849fce7cfd95d9fe7216b5     35275  payload/pocs/42532171/poc
+3a1c8c2a32ca1c8d45f380cf77615ef27f8d1e759b7cd646e206511aca5e2477        82  payload/pocs/42532195/poc
+9dd82f3421993fddd5940504d9ea3f6f2138edf7b2a7cb6bb2ac355baf3b1b9a        16  payload/pocs/42532224/poc
+dcdbb91a1b03b5816d7e753a9a8cdbd04dcc416ac242fb9cf2f236d5cdddc699        29  payload/pocs/42532234/poc
+2caec4b26e6e75fc86e2363836f26f980466272e52340787a0aa263831181398      5008  payload/pocs/42532309/poc
+57f6dd75ace9fc791c38e70bcfc435f37221554a533fc23af999446745e90c44     40000  payload/pocs/42532326/poc
+05f3a46e8efa4495d81a22fd8b8f59e028c288c3cb53423c048cd96167993fac       562  payload/pocs/42532370/poc
+f0b3b7b665057a397e3ab0f419d2fb937951ca76c3cb6822d4355cf8264dce6e      4104  payload/pocs/42532396/poc
+fb6dabbec2c88dc73b1db8c75def96d87882ab757e9d14e3d7d314d43045cf27       395  payload/pocs/42532480/poc
+f3d47a97ae39c14030545b71257fcc82f8d5c745c22e51e159095113393366da        26  payload/pocs/42532576/poc
+b953341cd32b8d57d5eedc1e18b9b46a86aff8f3b3c2c2b560eb2fbac5985a15        32  payload/pocs/42532587/poc
+93c3bc9c18903a5d27525717e290f5789f516b00479a557b3c5cf091647ca22e        18  payload/pocs/42532601/poc
+95268edcffcc37100b24907f8fd8cea80f0638d9c8fb0f50d6bc8a4d98703b34      1034  payload/pocs/42532650/poc
+63195a38c2c53ddf31166aede292c6d3ad6f4206e43a3ccc245a30086a00b202        54  payload/pocs/42532685/poc
+704ba997745f561bb6cc5e34837aa1d91731555a4a690df4a48fe14105019ffd      5001  payload/pocs/42532961/poc
+76d198b6ae5315ffea1e55634ed0c10477f3783658bdd2acb8d873752b8bab80       188  payload/pocs/42533061/poc
+9283657fe27f5c7deed63b23ce2a4d122d8e480eea626e0281abebd7a6855e75      1484  payload/pocs/42533223/poc
+5f236fbf5aa5573fe0d3d2d70087f1b09f3653b8d40e64686eca1e60fdf89828      2861  payload/pocs/42533348/poc
+f0053b7b25f1ed2bc75a6dc28d6abfce7ec156e31ad72bc93c2c7cc7f528d154      3666  reports/verify-one-by-one.json
+7fdbb40689a08e7a41713ff0d9b34c3758b29942032de8551a78ee081d4bea81       118  reports/verify-one.json
+ce144b7ebbca1d5ce1b69b04f72de8d7697e4c0d4d6d2fc496022abbec19e7cc      2100  reports/verify.json
+bd8c8d961bb33840d75cc482fd128af735f6b00a98d4260e7a82a473f134d907      1156  scripts/build.sh
+9b5c46d816e7a62c911ccee847028aba77761d88550b483bfe4324450e0293fa       576  scripts/fuzz_parse.c
+5c1f38bcf4b72efc589ce37e4183e5e1bc561d5627cd954c0f5dee372a02bb9e       630  scripts/fuzz_probe_analyze.c
+8dff63026b9f4cbbae9482ef9cce2e247c3fd15adff911a64d17f525f410d4aa     10526  scripts/lib.sh
+92013307dfec88a0d92959ef8c1c13fd006c07f34acc2826c2be1dff17d4da4d      1234  scripts/standalone_main.c
+f40c535935e2190ae60e833781b443e295fc84e7780df4ab27d747906ac624c9      2315  scripts/verify-one-by-one.sh
+aed653641beb1c266605e9a0bfae71876d65a7c515cbefa1d1fb4f77edd473f0      3839  scripts/verify-one.sh
+eed682cf6ba1ba46fa35c9f6083742e755376455c5be600c79341a89323d658b      2276  scripts/verify.sh
+```
 
-## 交付文件
-
-73 个文件，合计 262930 字节。
-
-| 文件 | 字节 | sha256 |
-| --- | --- | --- |
-| `README.md` | 4201 | `fb43183cebbea7e1…` |
-| `SPECIFICATION.md` | 7605 | `228193dc7065e159…` |
-| `image/Dockerfile` | 3207 | `3d68d6fd35ac61b3…` |
-| `payload/cases.tsv` | 3922 | `8b4afa86466d94e2…` |
-| `payload/patch-index.json` | 9249 | `5e73c868f9f31b46…` |
-| `payload/vulnerabilities.json` | 41549 | `9e6f2c3a2f6a5b59…` |
-| `payload/patches/42531304.patch` | 570 | `2db6c800c803e0ae…` |
-| `payload/patches/42531317.patch` | 454 | `8b509a9d3123ae95…` |
-| `payload/patches/42531339.patch` | 680 | `6807ed31e35dc442…` |
-| `payload/patches/42531361.patch` | 1144 | `515cd15eb021eaec…` |
-| `payload/patches/42531371.patch` | 817 | `eda2bddd7b7c2c27…` |
-| `payload/patches/42531432.patch` | 602 | `c2887766b0febe9f…` |
-| `payload/patches/42531500.patch` | 969 | `8ecb442f91b937f7…` |
-| `payload/patches/42531925.patch` | 1142 | `149227dee3a721bb…` |
-| `payload/patches/42532144.patch` | 2484 | `8f908d83093f2a58…` |
-| `payload/patches/42532171.patch` | 788 | `f92bfac2730f7272…` |
-| `payload/patches/42532195.patch` | 421 | `7222aa6b4a316f04…` |
-| `payload/patches/42532224.patch` | 2204 | `4f0f7b8137af84de…` |
-| `payload/patches/42532234.patch` | 934 | `2881644f51cf8bf0…` |
-| `payload/patches/42532309.patch` | 442 | `9ffdffb2c596f338…` |
-| `payload/patches/42532326.patch` | 1108 | `f136e6fc8873208e…` |
-| `payload/patches/42532370.patch` | 889 | `1b332fea4e683281…` |
-| `payload/patches/42532396.patch` | 845 | `054520259263cde1…` |
-| `payload/patches/42532480.patch` | 1816 | `f57982d396355a97…` |
-| `payload/patches/42532576.patch` | 655 | `b48fb3c50472d0f8…` |
-| `payload/patches/42532587.patch` | 559 | `7566e8dd3c959ee5…` |
-| `payload/patches/42532601.patch` | 716 | `ea1cdd1cfa1db59b…` |
-| `payload/patches/42532650.patch` | 831 | `afd58e704a79a397…` |
-| `payload/patches/42532685.patch` | 1484 | `86ab8c737c4c427e…` |
-| `payload/patches/42532961.patch` | 740 | `0e9c51ef8de9ea8d…` |
-| `payload/patches/42533061.patch` | 924 | `819f771868dcbcb8…` |
-| `payload/patches/42533223.patch` | 524 | `fc0d41c30429c192…` |
-| `payload/patches/42533348.patch` | 607 | `2b9639f80b574648…` |
-| `payload/pocs/42531304/poc` | 5001 | `a3db26eb4d0a4dfd…` |
-| `payload/pocs/42531317/poc` | 8 | `de85814ad9cb4769…` |
-| `payload/pocs/42531339/poc` | 4941 | `735e413423b64b7b…` |
-| `payload/pocs/42531361/poc` | 110 | `940fa45214968e17…` |
-| `payload/pocs/42531371/poc` | 3091 | `532f47a1d14f9a8c…` |
-| `payload/pocs/42531432/poc` | 1183 | `d85ba81ec1ac7032…` |
-| `payload/pocs/42531500/poc` | 16384 | `86864c6ae5a63d3e…` |
-| `payload/pocs/42531925/poc` | 117 | `265d093be4b5668e…` |
-| `payload/pocs/42532144/poc` | 1210 | `4a0a78af1d992eb4…` |
-| `payload/pocs/42532171/poc` | 35275 | `9c5d6317feb836f6…` |
-| `payload/pocs/42532195/poc` | 82 | `3a1c8c2a32ca1c8d…` |
-| `payload/pocs/42532224/poc` | 16 | `9dd82f3421993fdd…` |
-| `payload/pocs/42532234/poc` | 29 | `dcdbb91a1b03b581…` |
-| `payload/pocs/42532309/poc` | 5008 | `2caec4b26e6e75fc…` |
-| `payload/pocs/42532326/poc` | 40000 | `57f6dd75ace9fc79…` |
-| `payload/pocs/42532370/poc` | 562 | `05f3a46e8efa4495…` |
-| `payload/pocs/42532396/poc` | 4104 | `f0b3b7b665057a39…` |
-| `payload/pocs/42532480/poc` | 395 | `fb6dabbec2c88dc7…` |
-| `payload/pocs/42532576/poc` | 26 | `f3d47a97ae39c140…` |
-| `payload/pocs/42532587/poc` | 32 | `b953341cd32b8d57…` |
-| `payload/pocs/42532601/poc` | 18 | `93c3bc9c18903a5d…` |
-| `payload/pocs/42532650/poc` | 1034 | `95268edcffcc3710…` |
-| `payload/pocs/42532685/poc` | 54 | `63195a38c2c53ddf…` |
-| `payload/pocs/42532961/poc` | 5001 | `704ba997745f561b…` |
-| `payload/pocs/42533061/poc` | 188 | `76d198b6ae5315ff…` |
-| `payload/pocs/42533223/poc` | 1484 | `9283657fe27f5c7d…` |
-| `payload/pocs/42533348/poc` | 2861 | `5f236fbf5aa5573f…` |
-| `reports/baseline-run.log` | 13214 | `bddb6a2615b33c6b…` |
-| `reports/one-42531304.json` | 355 | `6d0941e311a9e95f…` |
-| `reports/one-42532601.json` | 295 | `74095ef0b78caa18…` |
-| `reports/triage.json` | 549 | `041d32469e5acf6d…` |
-| `reports/verify-one-by-one.json` | 3806 | `466cc5d3e6398b86…` |
-| `scripts/build.sh` | 1156 | `bd8c8d961bb33840…` |
-| `scripts/fuzz_parse.c` | 576 | `9b5c46d816e7a62c…` |
-| `scripts/fuzz_probe_analyze.c` | 630 | `5c1f38bcf4b72efc…` |
-| `scripts/lib.sh` | 10526 | `8dff63026b9f4cbb…` |
-| `scripts/standalone_main.c` | 1234 | `92013307dfec88a0…` |
-| `scripts/verify-one-by-one.sh` | 1671 | `e0b27bb2e7638aab…` |
-| `scripts/verify-one.sh` | 3266 | `161f450190f02ddf…` |
-| `scripts/verify.sh` | 2356 | `7fbcfbcf1ed10b36…` |
-
-完整 sha256 由 `check_package.py --manifest` 复核（截断仅为可读）。
+Anything not listed here does not belong to the package: no `.git`, no build
+output, no downloaded PoC cache.

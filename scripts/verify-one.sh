@@ -1,70 +1,84 @@
 #!/bin/bash
-# One case, both sides: the PoC must crash the baseline and go quiet once the
-# case's patch is applied.
+# One case, on one source tree: as-is (default) or that case's patch applied
+# (--patched).
 #
-#   verify-one.sh --case ID [--tree DIR] [--report DIR]
+#   verify-one.sh <pocId> [--patched] [--report DIR] [--keep] [--tree DIR]
 #
-# The patched tree is a copy of the baseline under /work with payload/patches/
-# <ID>.patch applied by `git apply`; it gets its own fingerprint, so it is built
-# into its own /work/build-* directory and never shares objects with the
-# baseline build.
+# --tree DIR — source tree to test; default /src/gpac (or $GPDT_TREE).
+#   Default mode builds (cached) that tree and runs the case's PoC: the bug is
+#   still there, so the sanitizer reports and pass is false.
+# --patched — copy that tree to /work/one-<localId>, apply the case's single
+#   patch (nothing else), build, run the same PoC.  pass is true when the
+#   sanitizer no longer reports.  The source tree itself is never modified.
+#
+# `pass` means the same thing in every report this package writes: **the PoC did
+# not crash the tree under test**.  Baseline -> false, patched -> true.  A run
+# that neither crashed nor exited 0 is reported as CRASH too (pass=false): the
+# report has no separate count for inconclusive runs.  GPDT_COLD=1 forces a full
+# gpac rebuild for the patched tree instead of the incremental path.
 set -uo pipefail
-. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
+. "$(dirname "$0")/lib.sh"
 
-cases_file=${PAYLOAD:?}/cases.tsv
-report_dir=/reports
-id="" 
-while [ $# -gt 0 ]; do
-  case $1 in
-    --case) id=${2:?}; shift 2 ;;
-    --tree) TREE=${2:?}; shift 2 ;;
-    --report) report_dir=${2:?}; shift 2 ;;
-    -h|--help) sed -n '2,10p' "$0"; exit 0 ;;
-    *) die "unknown argument $1" ;;
-  esac
-done
-[ -n "$id" ] || die "usage: verify-one.sh --case ID"
-mkdir -p "$report_dir"
+report=reports; ID=""; keep=0; patched=0; src=$TREE
+while [ $# -gt 0 ]; do case "$1" in
+  --report) report=${2:?}; shift 2 ;;
+  --patched) patched=1; shift ;;
+  --keep) keep=1; shift ;;
+  --tree) src=${2:?}; shift 2 ;;
+  -h|--help) sed -n '2,18p' "$0"; exit 0 ;;
+  -*) die "unknown argument: $1" ;;
+  *) [ -z "$ID" ] || die "only one pocId at a time"; ID=$1; shift ;;
+esac; done
+[ -n "$ID" ] || die "usage: verify-one.sh <pocId> [--patched] [--report DIR] [--keep] [--tree DIR]"
+[ -d "$src" ] || die "no such source tree: $src"
 
-row=$(awk -F'\t' -v id="$id" '$1 == id {print}' "$cases_file")
-[ -n "$row" ] || die "case $id not in $cases_file"
-IFS=$'\t' read -r _ target san expect poc patch fix <<< "$row"
-[ -f "$PAYLOAD/$poc" ] || die "missing PoC $PAYLOAD/$poc"
-[ -f "$PAYLOAD/$patch" ] || die "missing patch $PAYLOAD/$patch"
+row=$(awk -F'\t' -v id="$ID" '!/^#/ && $1 == id { print; exit }' "$PAYLOAD/cases.tsv")
+[ -n "$row" ] || die "case '$ID' not found in $PAYLOAD/cases.tsv"
+fuzzer=$(printf '%s\n' "$row" | cut -f2)
+san=$(printf '%s\n' "$row" | cut -f3)
+alert=$(printf '%s\n' "$row" | cut -f4)
+poc=$(printf '%s\n' "$row" | cut -f6)
+patch_file="$PAYLOAD/$(printf '%s\n' "$row" | cut -f7)"
+patch=${patch_file#"$PAYLOAD/"}
 
-# Baseline side: the bug must be there.
-base_bin=$(ensure_repro "$TREE" "$san" "$target") || exit 1
-IFS=$'\t' read -r b_verdict b_summary <<< "$(run_poc "$san" "$base_bin" "$PAYLOAD/$poc")"
-
-# Patched side.
-patched="$WORK/case-$id"
-rm -rf "$patched"; mkdir -p "$patched"
-( cd "$TREE" && tar -cf - --exclude=./.git . ) | ( cd "$patched" && tar -xf - ) ||
-  die "cannot copy $TREE"
-# GNU patch, not `git apply`: the tree is a plain directory and file modes do
-# not survive a Windows bind mount, which makes git apply refuse every patch.
-( cd "$patched" && patch -p1 -s -i "$PAYLOAD/$patch" ) || die "patch $patch does not apply"
-# GPDT_COLD=1 forces the cold build path (full gpac compile) instead of
-# cloning the baseline build directory; used to cross-check a verdict.
-if [ "${GPDT_COLD:-0}" = 1 ]; then
-  p_bin=$(ensure_repro "$patched" "$san" "$target") || exit 1
-else
-  GPDT_PATCH="$PAYLOAD/$patch" GPDT_INCR_BASE="$TREE" \
-    p_bin=$(ensure_repro "$patched" "$san" "$target") || exit 1
+tree="$src"; work=""; patched_fp=""
+if [ "$patched" -eq 1 ]; then
+  [ -f "$patch_file" ] || die "patch not found: $patch_file"
+  work="$WORK/one-$ID"
+  rm -rf "$work"; mkdir -p "$work" || die "cannot create $work"
+  cp -a "$src/." "$work/" || die "cannot copy $src"
+  # GNU patch, not `git apply`: the tree is a plain directory and file modes do
+  # not survive a Windows bind mount, which makes git apply refuse every patch.
+  ( cd "$work" && patch -p1 -s -i "$patch_file" ) || die "does not apply to $src: $patch"
+  tree="$work"; patched_fp=$(src_fp "$work")
+  # Clone the baseline build directory and let make rebuild only the objects the
+  # patch touched (a case costs seconds instead of a full gpac build).
+  if [ "${GPDT_COLD:-0}" != 1 ]; then
+    GPDT_PATCH="$patch_file" GPDT_INCR_BASE="$src" export GPDT_PATCH GPDT_INCR_BASE
+  fi
 fi
-IFS=$'\t' read -r p_verdict p_summary <<< "$(run_poc "$san" "$p_bin" "$PAYLOAD/$poc")"
 
-pass=false
-[ "$b_verdict" = "CRASH" ] && [ "$p_verdict" = "CLEAN" ] && pass=true
-# JSON-safe: sanitizer summaries carry quotes, backslashes and tabs.
-jstr() { printf '%s' "$1" | tr -d '\r' | tr '\n\t' '  ' | sed 's/\\/\\\\/g; s/"/\\"/g'; }
-printf '{"case": %s, "patch": "%s", "sanitizer": "%s", "target": "%s", "baseline": {"verdict": "%s", "summary": "%s"}, "patched": {"verdict": "%s", "summary": "%s"}, "pass": %s}\n' \
-  "$id" "$patch" "$san" "$target" "$b_verdict" "$(jstr "$b_summary")" "$p_verdict" "$(jstr "$p_summary")" "$pass" \
-  > "$report_dir/one-$id.json"
-printf '%-10s baseline %-6s patched %-6s %s\n' "$id" "$b_verdict" "$p_verdict" \
-  "$([ "$pass" = true ] && echo PASS || echo FAIL) — $p_summary"
-printf 'report: %s\n' "$report_dir/one-$id.json"
-# Drop this case's build tree: the reproducer in /out is cached by fingerprint, so
-# a re-run skips the build, and 33 copies of a half-gigabyte tree would not fit.
-rm -rf "$WORK/build-$(src_fp "$patched")-$san"
-[ "$pass" = true ]
+bin=$(ensure_repro "$tree" "$san" "$fuzzer") || exit 1
+out=$(run_poc "$san" "$bin" "$PAYLOAD/$poc")
+status=CRASH; [ "${out%%$'\t'*}" = CLEAN ] && status=CLEAN
+
+pass=false; [ "$status" = CLEAN ] && pass=true
+
+mkdir -p "$report" || die "cannot create $report"
+json="$report/verify-one.json"
+{
+  printf '{"pass": %s, "fail": %s, "results": [\n' \
+    "$([ "$pass" = true ] && echo 1 || echo 0)" "$([ "$pass" = true ] && echo 0 || echo 1)"
+  printf '  {"poc": "%s", "pass": %s, "alert": "%s"}' "$ID" "$pass" "$alert"
+  printf '\n]}\n'
+} > "$json.tmp" && mv -f "$json.tmp" "$json"
+
+printf 'RESULT\t%s\t%s\t%s\n' "$ID" "$pass" "$alert"
+printf '%-9s %-5s %-18s %-9s %s\n' "$ID" "$status" "$fuzzer" "$san" \
+  "$([ "$patched" -eq 1 ] && echo "tree + ${patch#patches/}" || echo baseline)"
+printf 'report  %s\n' "$json"
+if [ -n "$work" ] && [ "$keep" -eq 0 ]; then
+  rm -rf "$work"
+  [ -n "$patched_fp" ] && rm -rf "$WORK/build-$patched_fp-$san"
+fi
+[ "$pass" = "$([ "$patched" -eq 1 ] && echo true || echo false)" ]

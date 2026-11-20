@@ -1,56 +1,56 @@
 #!/bin/bash
-# Baseline verification: every shipped PoC must still crash the unpatched tree.
+# Every case of /payload/cases.tsv against one source tree — by default the
+# baseline this dataset ships, i.e. `verify-one.sh` looped over all cases.
 #
-#   verify.sh [--tree DIR] [--case ID]... [--report DIR] [--json]
+#   verify.sh [--report DIR] [--tree DIR]
 #
-# Builds the instrumented reproducer for each (target, sanitizer) pair the case
-# table uses, runs each PoC once under the sanitizer that reported it, and writes
-# <report>/verify.json.  Exits non-zero unless every case reports CRASH — a
-# silent change in the baseline, in a PoC or in the table fails loudly here.
+# --tree DIR — source tree to test; default /src/gpac (or $GPDT_TREE).
+# One line per case, then `clean=N crash=M`.  No patches are applied, so every
+# PoC is expected to crash: `pass` is false for every entry, and the top-level
+# `pass` count is 0.  That is the point — the baseline still has the bugs.
+#
+# Exit status is non-zero when a PoC comes back CLEAN (it no longer crashes the
+# tree under test), because a silent change there would make every downstream
+# "is it fixed?" answer meaningless.  A run that neither crashed nor exited 0
+# counts as crash here; see the limitations in README.
 set -uo pipefail
-. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
+. "$(dirname "$0")/lib.sh"
 
-cases_file=${PAYLOAD:?}/cases.tsv
-report_dir=${OUT:?}/../reports
-[ -d "$OUT/../reports" ] || report_dir=/reports
-want=()
-while [ $# -gt 0 ]; do
-  case $1 in
-    --tree) TREE=${2:?}; shift 2 ;;
-    --case) want+=("${2:?}"); shift 2 ;;
-    --report) report_dir=${2:?}; shift 2 ;;
-    --json) shift ;;
-    -h|--help) sed -n '2,9p' "$0"; exit 0 ;;
-    *) die "unknown argument $1" ;;
-  esac
-done
-[ -f "$cases_file" ] || die "missing case table $cases_file"
-mkdir -p "$report_dir"
+report=reports; src=$TREE
+while [ $# -gt 0 ]; do case "$1" in
+  --report) report=${2:?}; shift 2 ;;
+  --tree) src=${2:?}; shift 2 ;;
+  -h|--help) sed -n '2,15p' "$0"; exit 0 ;;
+  *) die "unknown argument: $1" ;;
+esac; done
+[ -d "$src" ] || die "no such source tree: $src"
 
-rows=$(awk -F'\t' '!/^#/ && NF >= 8 {print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6"\t"$7"\t"$8}' "$cases_file")
-json="$report_dir/verify.json"
+mkdir -p "$report" || die "cannot create $report"
+scrap=$(mktemp -d); trap 'rm -rf "$scrap"' EXIT
+rows="$scrap/rows"; : > "$rows"
+
+clean=0; crash=0
+while IFS=$'\t' read -r id _fuzzer san alert _frame _poc _patch _fc; do
+  [ -n "$id" ] || continue
+  if "$GPDT_HOME/verify-one.sh" "$id" --tree "$src" --report "$scrap" > "$scrap/out" 2>&1; then :; fi
+  ok=$(awk -F'\t' '$1 == "RESULT" { print $3 }' "$scrap/out")
+  [ -n "$ok" ] || ok=false
+  if [ "$ok" = true ]; then verdict=CLEAN; clean=$((clean+1)); else verdict=CRASH; crash=$((crash+1)); fi
+  printf '%s\t%s\t%s\n' "$id" "$ok" "$alert" >> "$rows"
+  printf '%-5s %-9s %-18s %-9s %s\n' "$verdict" "$id" "$_fuzzer" "$san" "$alert"
+done < <(awk -F'\t' '!/^#/ && NF >= 8' "$PAYLOAD/cases.tsv")
+
 {
-  printf '{\n  "base": "%s",\n  "src_fp": "%s",\n  "cases": [\n' "$TREE" "$(src_fp "$TREE")"
-} > "$json"
+  printf '{"pass": %s, "fail": %s, "results": [\n' "$clean" "$crash"
+  sep=""
+  while IFS=$'\t' read -r id ok alert; do
+    printf '%s  {"poc": "%s", "pass": %s, "alert": "%s"}' \
+      "$sep" "$id" "$ok" "$alert"
+    sep=$',\n'
+  done < "$rows"
+  printf '\n]}\n'
+} > "$report/verify.json"
 
-first=1 notcrash=0 total=0
-while IFS=$'\t' read -r id target san expect poc patch fix; do
-  [ -n "${id:-}" ] || continue
-  [ -f "$PAYLOAD/$poc" ] || die "missing PoC $PAYLOAD/$poc"
-  if [ ${#want[@]} -gt 0 ]; then
-    printf '%s\n' "${want[@]}" | grep -qx "$id" || continue
-  fi
-  bin=$(ensure_repro "$TREE" "$san" "$target") || exit 1
-  IFS=$'\t' read -r verdict summary <<< "$(run_poc "$san" "$bin" "$PAYLOAD/$poc")"
-  total=$((total + 1))
-  [ "$verdict" = "$expect" ] || notcrash=$((notcrash + 1))
-  [ $first -eq 1 ] || printf ',\n' >> "$json"; first=0
-  printf '    {"case": %s, "target": "%s", "sanitizer": "%s", "verdict": "%s", "expected": "%s", "summary": %s}' \
-    "$id" "$target" "$san" "$verdict" "$expect" "$(printf '%s' "$summary" | tr -d '\r' | tr '\n\t' '  ' | sed 's/\\/\\\\/g; s/"/\\"/g')" >> "$json"
-  printf '%-10s %-20s %-9s %-6s %s\n' "$id" "$target" "$san" "$verdict" "${summary:0:60}"
-done <<< "$rows"
-
-printf '\n  ]\n}\n' >> "$json"
-printf '%d cases, %d not %s\n' "$total" "$notcrash" "${expect:-CRASH}"
-printf 'report: %s\n' "$json"
-[ "$notcrash" -eq 0 ]
+printf 'clean=%s crash=%s\n' "$clean" "$crash"
+printf 'report: %s/verify.json\n' "$report"
+[ "$clean" -eq 0 ]

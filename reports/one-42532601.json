@@ -1,1 +1,0 @@
-{"case": 42532601, "patch": "patches/42532601.patch", "sanitizer": "ubsan", "target": "fuzz_probe_analyze", "baseline": {"verdict": "CRASH", "summary": "ietf/sdp.c:631:5: runtime error: index 10 out of bounds for type 'u32 [10]'"}, "patched": {"verdict": "CLEAN", "summary": "-"}, "pass": true}

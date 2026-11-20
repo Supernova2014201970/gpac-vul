@@ -1,0 +1,3 @@
+{"pass": 0, "fail": 1, "results": [
+  {"poc": "42531304", "pass": false, "alert": "Heap-buffer-overflow READ {*}"}
+]}

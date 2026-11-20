@@ -1,16 +1,25 @@
 {
  "project": "gpac",
- "baseline": "b890f1c443dbe1f941cd326d4473ce7ddef8e256",
- "pocs": 27,
+ "repo": "https://github.com/gpac/gpac",
+ "baseline": {
+  "commit": "b890f1c443dbe1f941cd326d4473ce7ddef8e256",
+  "describe": "v2.2.0-751-gb890f1c44",
+  "date": "2024-01-17",
+  "note": "数据集只有这一个节点：随包 src/gpac-readonly 与镜像 /src/gpac 都是它的导出（不含 .git，内容指纹 tree-3fb52327008566a2）。27 个 PoC 在此节点全部崩溃；把某条案例的 patch 单独应用后再跑，就不再崩溃。"
+ },
+ "paths": {
+  "cases": "cases.tsv",
+  "pocs": "pocs/<localId>/poc",
+  "patches": "patches/<fix_commit>.patch"
+ },
  "vulnerabilities": [
   {
-   "id": 42531304,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "Heap-buffer-overflow READ {*}",
-   "severity": "Medium",
-   "cwe": "CWE-125",
+   "id": "42531304",
+   "type": {
+    "crash_type": "Heap-buffer-overflow READ {*}",
+    "cwe": "CWE-125",
+    "cwe_name": "Out-of-bounds Read"
+   },
    "location": {
     "file": "src/utils/xml_parser.c",
     "line": 977,
@@ -58,22 +67,21 @@
      }
     ]
    },
-   "fix_commit": "538b229cab5e6317053c15c66417a9d053681ad0",
-   "fix_subject": "fixed potential crash in ghi demux init",
-   "patch": "patches/42531304.patch",
-   "files_touched": [
-    "src/filters/dmx_ghi.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42531304"
+   "code_snippet": {
+    "before": "\t\tbs = gf_bs_new(data, size, GF_BITSTREAM_READ);\n\t\te = ghi_dmx_init_bin(filter, ctx, bs);\n\t\tif (!e && gf_bs_is_overflow(bs)) e = GF_NON_COMPLIANT_BITSTREAM;\n\t} else {\n\t\te = ghi_dmx_init_xml(filter, ctx, data);\n\t}\n\tif (e) {\n\t\tif (bs) gf_bs_del(bs);",
+    "after": "\t\tbs = gf_bs_new(data, size, GF_BITSTREAM_READ);\n\t\te = ghi_dmx_init_bin(filter, ctx, bs);\n\t\tif (!e && gf_bs_is_overflow(bs)) e = GF_NON_COMPLIANT_BITSTREAM;\n\t} else if (gf_utf8_is_legal(data, size))\n\t\te = ghi_dmx_init_xml(filter, ctx, data);\n\telse {\n\t\te = GF_NON_COMPLIANT_BITSTREAM;\n\t}\n\tif (e) {\n\t\tif (bs) gf_bs_del(bs);",
+    "fix_summary": "xml_sax_append_string：fixed potential crash in ghi demux init（+3/-1 行）"
+   },
+   "description": "`src/utils/xml_parser.c:977`（`xml_sax_append_string`）：Heap-buffer-overflow READ {*}。PoC 经 `gf_xml_sax_parse_intern` → `xml_sax_append_string` 进入，栈深 10 帧；修复为 fixed potential crash in ghi demux init（src/filters/dmx_ghi.c，+3/-1 行）。",
+   "patch": "patches/538b229cab5e6317053c15c66417a9d053681ad0.patch"
   },
   {
-   "id": 42531317,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "Heap-buffer-overflow READ 1",
-   "severity": "Medium",
-   "cwe": "CWE-125",
+   "id": "42531317",
+   "type": {
+    "crash_type": "Heap-buffer-overflow READ 1",
+    "cwe": "CWE-125",
+    "cwe_name": "Out-of-bounds Read"
+   },
    "location": {
     "file": "src/utils/url.c",
     "line": 432,
@@ -121,22 +129,21 @@
      }
     ]
    },
-   "fix_commit": "8a6e53e5231354b52feaffc02eae48204303157d",
-   "fix_subject": "fixed possible mem overread",
-   "patch": "patches/42531317.patch",
-   "files_touched": [
-    "src/utils/url.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42531317"
+   "code_snippet": {
+    "before": "{\n\tif (!strnicmp(sURL, \"file://\", 7)) {\n\t\t/*file:///C:\\ scheme*/\n\t\tif ((sURL[7]=='/') && (sURL[9]==':')) {\n\t\t\tmemmove(sURL, sURL+8, strlen(sURL)-7);\n\t\t} else {\n\t\t\tmemmove(sURL, sURL+7, strlen(sURL)-6);",
+    "after": "{\n\tif (!strnicmp(sURL, \"file://\", 7)) {\n\t\t/*file:///C:\\ scheme*/\n\t\tif ((strlen(sURL)>=10) && (sURL[7]=='/') && (sURL[9]==':')) {\n\t\t\tmemmove(sURL, sURL+8, strlen(sURL)-7);\n\t\t} else {\n\t\t\tmemmove(sURL, sURL+7, strlen(sURL)-6);",
+    "fix_summary": "gf_url_to_fs_path：fixed possible mem overread（+1/-1 行）"
+   },
+   "description": "`src/utils/url.c:432`（`gf_url_to_fs_path`）：Heap-buffer-overflow READ 1。PoC 经 `gf_fs_load_source_dest_internal` → `gf_url_to_fs_path` 进入，栈深 10 帧；修复为 fixed possible mem overread（src/utils/url.c，+1/-1 行）。",
+   "patch": "patches/8a6e53e5231354b52feaffc02eae48204303157d.patch"
   },
   {
-   "id": 42531339,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "Stack-buffer-overflow READ {*}",
-   "severity": "Medium",
-   "cwe": "CWE-125",
+   "id": "42531339",
+   "type": {
+    "crash_type": "Stack-buffer-overflow READ {*}",
+    "cwe": "CWE-125",
+    "cwe_name": "Out-of-bounds Read"
+   },
    "location": {
     "file": "src/utils/alloc.c",
     "line": 170,
@@ -180,22 +187,21 @@
      }
     ]
    },
-   "fix_commit": "4786c169258fcf4adfeafe03e09c1f214c0d09cf",
-   "fix_subject": "fixed potential crash parsing broken vtt files",
-   "patch": "patches/42531339.patch",
-   "files_touched": [
-    "src/media_tools/webvtt.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42531339"
+   "code_snippet": {
+    "before": "\nGF_Err gf_webvtt_parser_parse_internal(GF_WebVTTParser *parser, GF_WebVTTCue *cue)\n{\n\tchar szLine[2048];\n\tchar *sOK;\n\tu32 len;\n\tGF_Err e;",
+    "after": "\nGF_Err gf_webvtt_parser_parse_internal(GF_WebVTTParser *parser, GF_WebVTTCue *cue)\n{\n\tchar szLine[2049];\n\tchar *sOK;\n\tu32 len;\n\tGF_Err e;",
+    "fix_summary": "gf_strdup：fixed potential crash parsing broken vtt files（+1/-1 行，2 个 hunk）"
+   },
+   "description": "`src/utils/alloc.c:170`（`gf_strdup`）：Stack-buffer-overflow READ {*}。PoC 经 `gf_webvtt_parser_parse_internal` → `gf_strdup` 进入，栈深 9 帧；修复为 fixed potential crash parsing broken vtt files（src/media_tools/webvtt.c，+1/-1 行）。",
+   "patch": "patches/4786c169258fcf4adfeafe03e09c1f214c0d09cf.patch"
   },
   {
-   "id": 42531361,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "ubsan",
-   "crash_type": "Index-out-of-bounds",
-   "severity": "Medium",
-   "cwe": "CWE-129",
+   "id": "42531361",
+   "type": {
+    "crash_type": "Index-out-of-bounds",
+    "cwe": "CWE-129",
+    "cwe_name": "Improper Validation of Array Index"
+   },
    "location": {
     "file": "src/media_tools/av_parsers.c",
     "line": 11638,
@@ -243,22 +249,21 @@
      }
     ]
    },
-   "fix_commit": "170631255f5504243b34323d61edb60b2dfbce51",
-   "fix_subject": "fixed possible crash in vvc tile parsing of corrupted streams",
-   "patch": "patches/42531361.patch",
-   "files_touched": [
-    "src/media_tools/av_parsers.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42531361"
+   "code_snippet": {
+    "before": "\t\t\tu32 min_ctby=0;\n\t\t\tu32 max_ctby=0;\n\n\t\t\tfor (i=0; i<tileY; i++) min_ctby += si->pps->tile_rows_height_ctb[i];\n\t\t\tmax_ctby = min_ctby + si->pps->tile_rows_height_ctb[i];\n",
+    "after": "\t\t\tu32 min_ctby=0;\n\t\t\tu32 max_ctby=0;\n\n\t\t\tif (tileY>=VVC_MAX_TILE_ROWS) return -1;\n\t\t\tif (tileX>=VVC_MAX_TILE_COLS) return -1;\n\n\t\t\tfor (i=0; i<tileY; i++) min_ctby += si->pps->tile_rows_height_ctb[i];\n\t\t\tmax_ctby = min_ctby + si->pps->tile_rows_height_ctb[i];\n",
+    "fix_summary": "vvc_get_ctb_info_in_slice：fixed possible crash in vvc tile parsing of corrupted streams（+3/-0 行，2 个 hunk）"
+   },
+   "description": "`src/media_tools/av_parsers.c:11638`（`vvc_get_ctb_info_in_slice`）：Index-out-of-bounds。PoC 经 `vvc_get_num_entry_points` → `vvc_get_ctb_info_in_slice` 进入，栈深 10 帧；修复为 fixed possible crash in vvc tile parsing of corrupted streams（src/media_tools/av_parsers.c，+3/-0 行）。",
+   "patch": "patches/170631255f5504243b34323d61edb60b2dfbce51.patch"
   },
   {
-   "id": 42531371,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "Stack-buffer-overflow WRITE 1",
-   "severity": "High",
-   "cwe": "CWE-121",
+   "id": "42531371",
+   "type": {
+    "crash_type": "Stack-buffer-overflow WRITE 1",
+    "cwe": "CWE-121",
+    "cwe_name": "Stack-based Buffer Overflow"
+   },
    "location": {
     "file": "src/utils/token.c",
     "line": 105,
@@ -298,22 +303,21 @@
      }
     ]
    },
-   "fix_commit": "067bef9548698847fe9126308626e672e1ecab75",
-   "fix_subject": "fixed potential overflow in token read with broken sdp",
-   "patch": "patches/42531371.patch",
-   "files_touched": [
-    "src/utils/token.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42531371"
+   "code_snippet": {
+    "before": "s32 gf_token_get_line(const char *Buffer, u32 Start, u32 Size, char *LineBuffer, u32 LineBufferSize)\n{\n\tu32 offset;\n\ts32 i, End, Total;\n\tLineBuffer[0] = 0;\n\tif (Start >= Size) return -1;\n",
+    "after": "s32 gf_token_get_line(const char *Buffer, u32 Start, u32 Size, char *LineBuffer, u32 LineBufferSize)\n{\n\tu32 offset;\n\ts32 End, Total;\n\tLineBuffer[0] = 0;\n\tif (Start >= Size) return -1;\n",
+    "fix_summary": "gf_token_get_line：fixed potential overflow in token read with broken sdp（+1/-1 行，2 个 hunk）"
+   },
+   "description": "`src/utils/token.c:105`（`gf_token_get_line`）：Stack-buffer-overflow WRITE 1。PoC 经 `gf_sdp_info_parse` → `gf_token_get_line` 进入，栈深 8 帧；修复为 fixed potential overflow in token read with broken sdp（src/utils/token.c，+1/-1 行）。",
+   "patch": "patches/067bef9548698847fe9126308626e672e1ecab75.patch"
   },
   {
-   "id": 42531432,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "ubsan",
-   "crash_type": "Index-out-of-bounds",
-   "severity": "Medium",
-   "cwe": "CWE-129",
+   "id": "42531432",
+   "type": {
+    "crash_type": "Index-out-of-bounds",
+    "cwe": "CWE-129",
+    "cwe_name": "Improper Validation of Array Index"
+   },
    "location": {
     "file": "src/media_tools/av_parsers.c",
     "line": 7086,
@@ -357,22 +361,21 @@
      }
     ]
    },
-   "fix_commit": "14ecc478ad48b4df8b0892a7f25cae90a714f059",
-   "fix_subject": "fixed index out of band in hevc ref pics with broken streams",
-   "patch": "patches/42531432.patch",
-   "files_touched": [
-    "src/media_tools/av_parsers.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42531432"
+   "code_snippet": {
+    "before": "\t\t\t}\n\t\t\tif ((ref_idc == 1) || (ref_idc == 2)) {\n\t\t\t\ts32 deltaPOC = deltaRPS;\n\t\t\t\tif (i < nb_ref_pics)\n\t\t\t\t\tdeltaPOC += ref_ps->delta_poc[i];\n\n\t\t\t\trps->delta_poc[k] = deltaPOC;\n\n\t\t\t\tif (deltaPOC < 0)  k0++;\n\t\t\t\telse k1++;",
+    "after": "\t\t\t}\n\t\t\tif ((ref_idc == 1) || (ref_idc == 2)) {\n\t\t\t\ts32 deltaPOC = deltaRPS;\n\t\t\t\tif ((i < nb_ref_pics) && (i<16))\n\t\t\t\t\tdeltaPOC += ref_ps->delta_poc[i];\n\n\t\t\t\tif (k<16)\n\t\t\t\t\trps->delta_poc[k] = deltaPOC;\n\n\t\t\t\tif (deltaPOC < 0)  k0++;\n\t\t\t\telse k1++;",
+    "fix_summary": "hevc_parse_short_term_ref_pic_set：fixed index out of band in hevc ref pics with broken streams（+3/-2 行）"
+   },
+   "description": "`src/media_tools/av_parsers.c:7086`（`hevc_parse_short_term_ref_pic_set`）：Index-out-of-bounds。PoC 经 `gf_hevc_read_sps_bs_internal` → `hevc_parse_short_term_ref_pic_set` 进入，栈深 9 帧；修复为 fixed index out of band in hevc ref pics with broken streams（src/media_tools/av_parsers.c，+3/-2 行）。",
+   "patch": "patches/14ecc478ad48b4df8b0892a7f25cae90a714f059.patch"
   },
   {
-   "id": 42531500,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "ubsan",
-   "crash_type": "Index-out-of-bounds",
-   "severity": "Medium",
-   "cwe": "CWE-129",
+   "id": "42531500",
+   "type": {
+    "crash_type": "Index-out-of-bounds",
+    "cwe": "CWE-129",
+    "cwe_name": "Improper Validation of Array Index"
+   },
    "location": {
     "file": "src/media_tools/gpac_ogg.c",
     "line": 366,
@@ -408,23 +411,21 @@
      }
     ]
    },
-   "fix_commit": "c3ce6dd423aa459de3690016833ed740df54f989",
-   "fix_subject": "fixed bug in vorbis header parsing",
-   "patch": "patches/42531500.patch",
-   "files_touched": [
-    "src/media_tools/av_parsers.c",
-    "src/media_tools/gpac_ogg.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42531500"
+   "code_snippet": {
+    "before": "\t\t\tgf_free(class_dims);\n\t\t}\n\t\telse {\n\t\t\toggpack_read(&opb, 8 + 16 + 16 + 6 + 8);\n\t\t\tnb_books = oggpack_read(&opb, 4) + 1;\n\t\t\tfor (j = 0; j < nb_books; j++)\n\t\t\t\toggpack_read(&opb, 8);",
+    "after": "\t\t\tgf_free(class_dims);\n\t\t}\n\t\telse {\n\t\t\toggpack_read(&opb, 8);\n\t\t\toggpack_read(&opb, 16);\n\t\t\toggpack_read(&opb, 16);\n\t\t\toggpack_read(&opb, 6);\n\t\t\toggpack_read(&opb, 8);\n\t\t\tnb_books = oggpack_read(&opb, 4) + 1;\n\t\t\tfor (j = 0; j < nb_books; j++)\n\t\t\t\toggpack_read(&opb, 8);",
+    "fix_summary": "oggpack_read：fixed bug in vorbis header parsing（+5/-1 行，2 个 hunk）"
+   },
+   "description": "`src/media_tools/gpac_ogg.c:366`（`oggpack_read`）：Index-out-of-bounds。PoC 经 `gf_vorbis_parse_header` → `oggpack_read` 进入，栈深 7 帧；修复为 fixed bug in vorbis header parsing（src/media_tools/av_parsers.c, src/media_tools/gpac_ogg.c，+5/-1 行）。",
+   "patch": "patches/c3ce6dd423aa459de3690016833ed740df54f989.patch"
   },
   {
-   "id": 42531925,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "Stack-buffer-overflow WRITE {*}",
-   "severity": "High",
-   "cwe": "CWE-121",
+   "id": "42531925",
+   "type": {
+    "crash_type": "Stack-buffer-overflow WRITE {*}",
+    "cwe": "CWE-121",
+    "cwe_name": "Stack-based Buffer Overflow"
+   },
    "location": {
     "file": "src/utils/os_net.c",
     "line": 1766,
@@ -472,22 +473,21 @@
      }
     ]
    },
-   "fix_commit": "0ff40625b602590afffb383ab03d155e0ba509ed",
-   "fix_subject": "fixed potential crash in unix domain sockets with broken adresses",
-   "patch": "patches/42531925.patch",
-   "files_touched": [
-    "src/utils/os_net.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42531925"
+   "code_snippet": {
+    "before": "\t\t\t\tgf_sk_set_block_mode(sock, GF_TRUE);\n\t\t}\n\t\tserver_add.sun_family = AF_UNIX;\n\t\tstrcpy(server_add.sun_path, PeerName);\n\t\tif (connect(sock->socket, (struct sockaddr *)&server_add, sizeof(struct sockaddr_un)) < 0) {\n\t\t\tGF_LOG(GF_LOG_ERROR, GF_LOG_NETWORK, (\"[Socket] Failed to connect unix domain socket to %s\\n\", PeerName));\n\t\t\treturn GF_IP_CONNECTION_FAILURE;",
+    "after": "\t\t\t\tgf_sk_set_block_mode(sock, GF_TRUE);\n\t\t}\n\t\tserver_add.sun_family = AF_UNIX;\n\t\tstrncpy(server_add.sun_path, PeerName, sizeof(server_add.sun_path));\n\t\tif (connect(sock->socket, (struct sockaddr *)&server_add, sizeof(struct sockaddr_un)) < 0) {\n\t\t\tGF_LOG(GF_LOG_ERROR, GF_LOG_NETWORK, (\"[Socket] Failed to connect unix domain socket to %s\\n\", PeerName));\n\t\t\treturn GF_IP_CONNECTION_FAILURE;",
+    "fix_summary": "gf_sk_connect：fixed potential crash in unix domain sockets with broken adresses（+1/-1 行，2 个 hunk）"
+   },
+   "description": "`src/utils/os_net.c:1766`（`gf_sk_connect`）：Stack-buffer-overflow WRITE {*}。PoC 经 `gf_filter_new_finalize` → `gf_sk_connect` 进入，栈深 10 帧；修复为 fixed potential crash in unix domain sockets with broken adresses（src/utils/os_net.c，+1/-1 行）。",
+   "patch": "patches/0ff40625b602590afffb383ab03d155e0ba509ed.patch"
   },
   {
-   "id": 42532144,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "Heap-buffer-overflow READ {*}",
-   "severity": "Medium",
-   "cwe": "CWE-125",
+   "id": "42532144",
+   "type": {
+    "crash_type": "Heap-buffer-overflow READ {*}",
+    "cwe": "CWE-125",
+    "cwe_name": "Out-of-bounds Read"
+   },
    "location": {
     "file": "src/filter_core/filter_props.c",
     "line": 1017,
@@ -535,22 +535,21 @@
      }
     ]
    },
-   "fix_commit": "593d9afa9db74a83909c4c1f1d27c9f4289e96c7",
-   "fix_subject": "fixed possible crash parsing cover art in broken id3tag",
-   "patch": "patches/42532144.patch",
-   "files_touched": [
-    "src/filters/reframe_mp3.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42532144"
+   "code_snippet": {
+    "before": "\t\t\tif (sep_desc) {\n\t\t\t\tGF_Err e;\n\t\t\t\tpic_size = (u32) ( (sep_desc + 1) - buf);\n\t\t\t\tpic_size = fsize - pic_size;\n\n\t\t\t\tif (video_pid_p) {\n\t\t\t\t\te = gf_filter_pid_raw_new(filter, NULL, NULL, buf+1, NULL, sep_desc+1, pic_size, GF_FALSE, video_pid_p);\n\t\t\t\t\tif (e) {\n\t\t\t\t\t\tGF_LOG(GF_LOG_ERROR, GF_LOG_MEDIA, (\"[MP3Dmx] error setting up video pid for cover art: %s\\n\", gf_error_to_string(e) ));\n\t\t\t\t\t}\n\t\t\t\t\tif (*video_pid_p) {\n\t\t\t\t\t\tu8 *out_buffer;\n\t\t\t\t\t\tGF_FilterPacket *dst_pck;\n\t\t\t\t\t\tgf_filter_pid_set_name(*video_pid_p, \"CoverArt\");\n\t\t\t\t\t\tgf_filter_pid_set_property(*video_pid_p, GF_PROP_PID_COVER_ART, &PROP_BOOL(GF_TRUE));\n\t\t\t\t\t\tdst_pck = gf_filter_pck_new_alloc(*video_pid_p, pic_size, &out_buffer);\n\t\t\t\t\t\tif (dst_pck) {\n\t\t\t\t\t\t\tgf_filter_pck_set_framing(dst_pck, GF_TRUE, GF_TRUE);\n\t\t\t\t\t\t\tmemcpy(out_buffer, sep_desc+1, pic_size);\n\t\t\t\t\t\t\tgf_filter_pck_send(dst_pck);\n\t\t\t\t\t\t}\n\n\t\t\t\t\t\tgf_filter_pid_set_eos(*video_pid_p);\n\t\t\t\t\t}\n\t\t\t\t} else {\n\t\t\t\t\tgf_filter_pid_set_property(audio_pid, GF_PROP_PID_COVER_ART, &PROP_DATA(sep_desc+1, pic_size) );\n\t\t\t\t}\n\t\t\t}\n\t\t} else if (tag_idx>=0) {",
+    "after": "\t\t\tif (sep_desc) {\n\t\t\t\tGF_Err e;\n\t\t\t\tpic_size = (u32) ( (sep_desc + 1) - buf);\n\t\t\t\tif (fsize>pic_size) {\n\t\t\t\t\tpic_size = fsize - pic_size;\n\n\t\t\t\t\tif (video_pid_p) {\n\t\t\t\t\t\te = gf_filter_pid_raw_new(filter, NULL, NULL, buf+1, NULL, sep_desc+1, pic_size, GF_FALSE, video_pid_p);\n\t\t\t\t\t\tif (e) {\n\t\t\t\t\t\t\tGF_LOG(GF_LOG_ERROR, GF_LOG_MEDIA, (\"[MP3Dmx] error setting up video pid for cover art: %s\\n\", gf_error_to_string(e) ));\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (*video_pid_p) {\n\t\t\t\t\t\t\tu8 *out_buffer;\n\t\t\t\t\t\t\tGF_FilterPacket *dst_pck;\n\t\t\t\t\t\t\tgf_filter_pid_set_name(*video_pid_p, \"CoverArt\");\n\t\t\t\t\t\t\tgf_filter_pid_set_property(*video_pid_p, GF_PROP_PID_COVER_ART, &PROP_BOOL(GF_TRUE));\n\t\t\t\t\t\t\tdst_pck = gf_filter_pck_new_alloc(*video_pid_p, pic_size, &out_buffer);\n\t\t\t\t\t\t\tif (dst_pck) {\n\t\t\t\t\t\t\t\tgf_filter_pck_set_framing(dst_pck, GF_TRUE, GF_TRUE);\n\t\t\t\t\t\t\t\tmemcpy(out_buffer, sep_desc+1, pic_size);\n\t\t\t\t\t\t\t\tgf_filter_pck_send(dst_pck);\n\t\t\t\t\t\t\t}\n\n\t\t\t\t\t\t\tgf_filter_pid_set_eos(*video_pid_p);\n\t\t\t\t\t\t}\n\t\t\t\t\t} else {\n\t\t\t\t\t\tgf_filter_pid_set_property(audio_pid, GF_PROP_PID_COVER_ART, &PROP_DATA(sep_desc+1, pic_size) );\n\t\t\t\t\t}\n\t\t\t\t} else {\n\t\t\t\t\tGF_LOG(GF_LOG_ERROR, GF_LOG_MEDIA, (\"[MP3Dmx] Corrupted cover art, ignoring\\n\"));\n\t\t\t\t}\n\t\t\t}\n\t\t} else if (tag_idx>=0) {",
+    "fix_summary": "gf_props_assign_value：fixed possible crash parsing cover art in broken id3tag（+23/-19 行）"
+   },
+   "description": "`src/filter_core/filter_props.c:1017`（`gf_props_assign_value`）：Heap-buffer-overflow READ {*}。PoC 经 `gf_props_insert_property` → `gf_props_assign_value` 进入，栈深 10 帧；修复为 fixed possible crash parsing cover art in broken id3tag（src/filters/reframe_mp3.c，+23/-19 行）。",
+   "patch": "patches/593d9afa9db74a83909c4c1f1d27c9f4289e96c7.patch"
   },
   {
-   "id": 42532171,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "Memcpy-param-overlap",
-   "severity": "Medium",
-   "cwe": null,
+   "id": "42532171",
+   "type": {
+    "crash_type": "Memcpy-param-overlap",
+    "cwe": "CWE-119",
+    "cwe_name": "Improper Restriction of Operations within the Bounds of a Memory Buffer"
+   },
    "location": {
     "file": "src/filters/reframe_mpgvid.c",
     "line": 739,
@@ -598,22 +597,21 @@
      }
     ]
    },
-   "fix_commit": "25ca355f14a28baeb6afd911ca7ae66deb37a1ac",
-   "fix_subject": "fixed possible memcpy overlap in rfmpegvid",
-   "patch": "patches/42532171.patch",
-   "files_touched": [
-    "src/filters/reframe_mpgvid.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42532171"
+   "code_snippet": {
+    "before": "\t\t//we have some potential bytes of a start code in the store, copy some more bytes and check if valid start code.\n\t\t//if not, dispatch these bytes as continuation of the data\n\t\tif (ctx->bytes_in_header) {\n\n\t\t\tmemcpy(ctx->hdr_store + ctx->bytes_in_header, start, MIN_HDR_STORE - ctx->bytes_in_header);\n\t\t\tcurrent = mpgviddmx_next_start_code(ctx->hdr_store, MIN_HDR_STORE);\n\n\t\t\t//no start code in stored buffer",
+    "after": "\t\t//we have some potential bytes of a start code in the store, copy some more bytes and check if valid start code.\n\t\t//if not, dispatch these bytes as continuation of the data\n\t\tif (ctx->bytes_in_header) {\n\t\t\t//the two zones may overlap\n\t\t\tmemmove(ctx->hdr_store + ctx->bytes_in_header, start, MIN_HDR_STORE - ctx->bytes_in_header);\n\t\t\tcurrent = mpgviddmx_next_start_code(ctx->hdr_store, MIN_HDR_STORE);\n\n\t\t\t//no start code in stored buffer",
+    "fix_summary": "mpgviddmx_process：fixed possible memcpy overlap in rfmpegvid（+2/-2 行）"
+   },
+   "description": "`src/filters/reframe_mpgvid.c:739`（`mpgviddmx_process`）：Memcpy-param-overlap。PoC 经 `gf_filter_process_task` → `mpgviddmx_process` 进入，栈深 10 帧；修复为 fixed possible memcpy overlap in rfmpegvid（src/filters/reframe_mpgvid.c，+2/-2 行）。",
+   "patch": "patches/25ca355f14a28baeb6afd911ca7ae66deb37a1ac.patch"
   },
   {
-   "id": 42532195,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "Stack-buffer-overflow WRITE 1",
-   "severity": "High",
-   "cwe": "CWE-121",
+   "id": "42532195",
+   "type": {
+    "crash_type": "Stack-buffer-overflow WRITE 1",
+    "cwe": "CWE-121",
+    "cwe_name": "Stack-based Buffer Overflow"
+   },
    "location": {
     "file": "src/ietf/rtsp_session.c",
     "line": 76,
@@ -661,22 +659,21 @@
      }
     ]
    },
-   "fix_commit": "52da2ef6b33c26d4ffd72d1d4ae6c42631ea433f",
-   "fix_subject": "fixed possible stack overflow with broken rtsp urls",
-   "patch": "patches/42532195.patch",
-   "files_touched": [
-    "src/ietf/rtsp_session.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42532195"
+   "code_snippet": {
+    "before": "\t//extract the schema\n\ti = 0;\n\twhile (i<=strlen(sURL)) {\n\t\tif (sURL[i] == ':') goto found;\n\t\tschema[i] = sURL[i];\n\t\ti += 1;",
+    "after": "\t//extract the schema\n\ti = 0;\n\twhile (i<=strlen(sURL)) {\n\t\tif (i==10) return GF_BAD_PARAM;\n\t\tif (sURL[i] == ':') goto found;\n\t\tschema[i] = sURL[i];\n\t\ti += 1;",
+    "fix_summary": "RTSP_UnpackURL：fixed possible stack overflow with broken rtsp urls（+1/-0 行）"
+   },
+   "description": "`src/ietf/rtsp_session.c:76`（`RTSP_UnpackURL`）：Stack-buffer-overflow WRITE 1。PoC 经 `gf_rtsp_session_new` → `RTSP_UnpackURL` 进入，栈深 10 帧；修复为 fixed possible stack overflow with broken rtsp urls（src/ietf/rtsp_session.c，+1/-0 行）。",
+   "patch": "patches/52da2ef6b33c26d4ffd72d1d4ae6c42631ea433f.patch"
   },
   {
-   "id": 42532224,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "ubsan",
-   "crash_type": "Index-out-of-bounds",
-   "severity": "Medium",
-   "cwe": "CWE-129",
+   "id": "42532224",
+   "type": {
+    "crash_type": "Index-out-of-bounds",
+    "cwe": "CWE-129",
+    "cwe_name": "Improper Validation of Array Index"
+   },
    "location": {
     "file": "src/ietf/sdp.c",
     "line": 613,
@@ -708,24 +705,21 @@
      }
     ]
    },
-   "fix_commit": "3e71b0ddc8632b8eea4424a4facb09e47ea353ba",
-   "fix_subject": "fixed potential crash in broken sdp parsing",
-   "patch": "patches/42532224.patch",
-   "files_touched": [
-    "src/filters/in_rtp_sdp.c",
-    "src/ietf/sdp.c",
-    "src/utils/token.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42532224"
+   "code_snippet": {
+    "before": "\n\tif (e == GF_OK) e = rtpin_setup_sdp(rtp, sdp, stream);\n\n\tif (!gf_list_count(rtp->streams))\n\t\te = GF_NOT_SUPPORTED;\n\n\tif (e != GF_OK) {",
+    "after": "\n\tif (e == GF_OK) e = rtpin_setup_sdp(rtp, sdp, stream);\n\n\tif (!gf_list_count(rtp->streams) && !e)\n\t\te = GF_NOT_SUPPORTED;\n\n\tif (e != GF_OK) {",
+    "fix_summary": "gf_sdp_info_parse：fixed potential crash in broken sdp parsing（+1/-1 行，5 个 hunk）"
+   },
+   "description": "`src/ietf/sdp.c:613`（`gf_sdp_info_parse`）：Index-out-of-bounds。PoC 经 `rtpin_load_sdp` → `gf_sdp_info_parse` 进入，栈深 6 帧；修复为 fixed potential crash in broken sdp parsing（src/filters/in_rtp_sdp.c, src/ietf/sdp.c, src/utils/token.c，+1/-1 行）。",
+   "patch": "patches/3e71b0ddc8632b8eea4424a4facb09e47ea353ba.patch"
   },
   {
-   "id": 42532234,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "Heap-buffer-overflow READ 8",
-   "severity": "Medium",
-   "cwe": "CWE-125",
+   "id": "42532234",
+   "type": {
+    "crash_type": "Heap-buffer-overflow READ 8",
+    "cwe": "CWE-125",
+    "cwe_name": "Out-of-bounds Read"
+   },
    "location": {
     "file": "src/media_tools/m3u8.c",
     "line": 1257,
@@ -773,22 +767,21 @@
      }
     ]
    },
-   "fix_commit": "964e268f0bf975b881f322ff6d9dd53957fa837d",
-   "fix_subject": "fixed possible heap iverflow with broken m3u8 parsing",
-   "patch": "patches/42532234.patch",
-   "files_touched": [
-    "src/media_tools/m3u8.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42532234"
+   "code_snippet": {
+    "before": "\tif (!safe_start_equals(name, line))\n\t\treturn NULL;\n\tret = gf_calloc((num_attributes + 1), sizeof(char*));\n\tcurr_attribute = 0;\n\tfor (i=start; i<=len; i++) {\n\t\tif (line[i] == '\\0' || (!quote && line[i] == ',')  || (line[i] == quote)) {",
+    "after": "\tif (!safe_start_equals(name, line))\n\t\treturn NULL;\n\tret = gf_calloc((num_attributes + 1), sizeof(char*));\n\tif (!ret) return NULL;\n\tif (!num_attributes) return ret;\n\t\n\tcurr_attribute = 0;\n\tfor (i=start; i<=len; i++) {\n\t\tif (line[i] == '\\0' || (!quote && line[i] == ',')  || (line[i] == quote)) {",
+    "fix_summary": "gf_m3u8_parse_sub_playlist：fixed possible heap iverflow with broken m3u8 parsing（+3/-0 行，2 个 hunk）"
+   },
+   "description": "`src/media_tools/m3u8.c:1257`（`gf_m3u8_parse_sub_playlist`）：Heap-buffer-overflow READ 8。PoC 经 `gf_m3u8_parse_master_playlist` → `gf_m3u8_parse_sub_playlist` 进入，栈深 10 帧；修复为 fixed possible heap iverflow with broken m3u8 parsing（src/media_tools/m3u8.c，+3/-0 行）。",
+   "patch": "patches/964e268f0bf975b881f322ff6d9dd53957fa837d.patch"
   },
   {
-   "id": 42532309,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "Heap-buffer-overflow READ 1",
-   "severity": "Medium",
-   "cwe": "CWE-125",
+   "id": "42532309",
+   "type": {
+    "crash_type": "Heap-buffer-overflow READ 1",
+    "cwe": "CWE-125",
+    "cwe_name": "Out-of-bounds Read"
+   },
    "location": {
     "file": "src/filters/reframe_mp3.c",
     "line": 645,
@@ -832,22 +825,21 @@
      }
     ]
    },
-   "fix_commit": "17d14c6a4f2c3f904a2065a07ef3ae915f78c2df",
-   "fix_subject": "fixed possible heap overfow in mp3 reframer",
-   "patch": "patches/42532309.patch",
-   "files_touched": [
-    "src/filters/reframe_mp3.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42532309"
+   "code_snippet": {
+    "before": "\n\n\t\t//ready to send packet\n\t\tif (size + 1 < remain-bytes_skipped) {\n\t\t\t//make sure we are sync!\n\t\t\tif (sync[size] !=0xFF) {\n\t\t\t\tif ((sync[size]=='T') && (sync[size+1]=='A') && (sync[size+2]=='G')) {",
+    "after": "\n\n\t\t//ready to send packet\n\t\tif (size + 3 < remain-bytes_skipped) {\n\t\t\t//make sure we are sync!\n\t\t\tif (sync[size] !=0xFF) {\n\t\t\t\tif ((sync[size]=='T') && (sync[size+1]=='A') && (sync[size+2]=='G')) {",
+    "fix_summary": "mp3_dmx_process：fixed possible heap overfow in mp3 reframer（+1/-1 行）"
+   },
+   "description": "`src/filters/reframe_mp3.c:645`（`mp3_dmx_process`）：Heap-buffer-overflow READ 1。PoC 经 `gf_filter_process_task` → `mp3_dmx_process` 进入，栈深 9 帧；修复为 fixed possible heap overfow in mp3 reframer（src/filters/reframe_mp3.c，+1/-1 行）。",
+   "patch": "patches/17d14c6a4f2c3f904a2065a07ef3ae915f78c2df.patch"
   },
   {
-   "id": 42532326,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "Heap-use-after-free READ 1",
-   "severity": "High",
-   "cwe": "CWE-416",
+   "id": "42532326",
+   "type": {
+    "crash_type": "Heap-use-after-free READ 1",
+    "cwe": "CWE-416",
+    "cwe_name": "Use After Free"
+   },
    "location": {
     "file": "src/filters/dmx_ogg.c",
     "line": 132,
@@ -895,22 +887,21 @@
      }
     ]
    },
-   "fix_commit": "fe46265eda4375086374ed41a4bb7f3906ced4ca",
-   "fix_subject": "fixed possible use after free in broken ogg streams",
-   "patch": "patches/42532326.patch",
-   "files_touched": [
-    "src/filters/dmx_ogg.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42532326"
+   "code_snippet": {
+    "before": "\t\tif (ogg_page_bos(&oggpage)) {\n\t\t\togg_stream_init(&os, ogg_page_serialno(&oggpage));\n\t\t\tif (ogg_stream_pagein(&os, &oggpage) >= 0 ) {\n\t\t\t\togg_stream_packetpeek(&os, &oggpacket);\n\t\t\t\tif (ogg_stream_pagein(&os, &oggpage) >= 0 ) {\n\t\t\t\t\togg_stream_packetpeek(&os, &oggpacket);\n\t\t\t\t\toggdmx_get_stream_info(&oggpacket, &info);\n\t\t\t\t}\n\t\t\t\tif (!has_stream) {\n\t\t\t\t\thas_stream = GF_TRUE;\n\t\t\t\t\togg_stream_init(&the_os, ogg_page_serialno(&oggpage));\n\t\t\t\t\tthe_info = info;\n\t\t\t\t}\n\t\t\t}\n\t\t\togg_stream_clear(&os);",
+    "after": "\t\tif (ogg_page_bos(&oggpage)) {\n\t\t\togg_stream_init(&os, ogg_page_serialno(&oggpage));\n\t\t\tif (ogg_stream_pagein(&os, &oggpage) >= 0 ) {\n\t\t\t\tif (ogg_stream_packetpeek(&os, &oggpacket)>0) {\n\t\t\t\t\tif (ogg_stream_pagein(&os, &oggpage) >= 0 ) {\n\t\t\t\t\t\togg_stream_packetpeek(&os, &oggpacket);\n\t\t\t\t\t\toggdmx_get_stream_info(&oggpacket, &info);\n\t\t\t\t\t}\n\t\t\t\t\tif (!has_stream) {\n\t\t\t\t\t\thas_stream = GF_TRUE;\n\t\t\t\t\t\togg_stream_init(&the_os, ogg_page_serialno(&oggpage));\n\t\t\t\t\t\tthe_info = info;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\togg_stream_clear(&os);",
+    "fix_summary": "oggdmx_get_stream_info：fixed possible use after free in broken ogg streams（+10/-9 行）"
+   },
+   "description": "`src/filters/dmx_ogg.c:132`（`oggdmx_get_stream_info`）：Heap-use-after-free READ 1。PoC 经 `oggdmx_check_dur` → `oggdmx_get_stream_info` 进入，栈深 10 帧；修复为 fixed possible use after free in broken ogg streams（src/filters/dmx_ogg.c，+10/-9 行）。",
+   "patch": "patches/fe46265eda4375086374ed41a4bb7f3906ced4ca.patch"
   },
   {
-   "id": 42532370,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "ubsan",
-   "crash_type": "Index-out-of-bounds",
-   "severity": "Medium",
-   "cwe": "CWE-129",
+   "id": "42532370",
+   "type": {
+    "crash_type": "Index-out-of-bounds",
+    "cwe": "CWE-129",
+    "cwe_name": "Improper Validation of Array Index"
+   },
    "location": {
     "file": "src/media_tools/av_parsers.c",
     "line": 7140,
@@ -954,22 +945,21 @@
      }
     ]
    },
-   "fix_commit": "a793966c6f4b11ad495d5fbca12f01ae787c767f",
-   "fix_subject": "fix array overflow on hevc weights",
-   "patch": "patches/42532370.patch",
-   "files_touched": [
-    "src/media_tools/av_parsers.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42532370"
+   "code_snippet": {
+    "before": "\tu8 luma_weights[20], chroma_weights[20];\n\tu32 ChromaArrayType = sps->separate_colour_plane_flag ? 0 : sps->chroma_format_idc;\n\n\tnum_ref_idx = num_ref_idx_l0_active;\n\n\tgf_bs_read_ue_log(bs, \"luma_log2_weight_denom\");\n\tif (ChromaArrayType != 0)",
+    "after": "\tu8 luma_weights[20], chroma_weights[20];\n\tu32 ChromaArrayType = sps->separate_colour_plane_flag ? 0 : sps->chroma_format_idc;\n\n\tnum_ref_idx = num_ref_idx_l0_active < 20 ? num_ref_idx_l0_active : 19 ;\n\n\tgf_bs_read_ue_log(bs, \"luma_log2_weight_denom\");\n\tif (ChromaArrayType != 0)",
+    "fix_summary": "hevc_pred_weight_table：fix array overflow on hevc weights（+1/-1 行，2 个 hunk）"
+   },
+   "description": "`src/media_tools/av_parsers.c:7140`（`hevc_pred_weight_table`）：Index-out-of-bounds。PoC 经 `hevc_parse_slice_segment` → `hevc_pred_weight_table` 进入，栈深 9 帧；修复为 fix array overflow on hevc weights（src/media_tools/av_parsers.c，+1/-1 行）。",
+   "patch": "patches/a793966c6f4b11ad495d5fbca12f01ae787c767f.patch"
   },
   {
-   "id": 42532396,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "Stack-buffer-overflow READ 1",
-   "severity": "Medium",
-   "cwe": "CWE-125",
+   "id": "42532396",
+   "type": {
+    "crash_type": "Stack-buffer-overflow READ 1",
+    "cwe": "CWE-125",
+    "cwe_name": "Out-of-bounds Read"
+   },
    "location": {
     "file": "src/filters/load_text.c",
     "line": 371,
@@ -1013,22 +1003,21 @@
      }
     ]
    },
-   "fix_commit": "a616b4fa0a73ff57eff65fcc6beba6b79260a4fd",
-   "fix_subject": "fix buffer overflow on utf8 conversion",
-   "patch": "patches/42532396.patch",
-   "files_touched": [
-    "src/filters/load_text.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42532396"
+   "code_snippet": {
+    "before": "\t\t\t\t}\n\t\t\t\t/*UTF8 3 bytes char*/\n\t\t\t\telse if ( (szLine[i] & 0xf0) == 0xe0) {\n\t\t\t\t\tif (j+1 >= GF_ARRAY_LENGTH(szLineConv))\n\t\t\t\t\t\tbreak;\n\t\t\t\t\tszLineConv[j] = szLine[i];\n\t\t\t\t\ti++;",
+    "after": "\t\t\t\t}\n\t\t\t\t/*UTF8 3 bytes char*/\n\t\t\t\telse if ( (szLine[i] & 0xf0) == 0xe0) {\n\t\t\t\t\tif (j+1 >= GF_ARRAY_LENGTH(szLineConv) || i+1 >= len)\n\t\t\t\t\t\tbreak;\n\t\t\t\t\tszLineConv[j] = szLine[i];\n\t\t\t\t\ti++;",
+    "fix_summary": "gf_text_get_utf8_line：fix buffer overflow on utf8 conversion（+1/-1 行，2 个 hunk）"
+   },
+   "description": "`src/filters/load_text.c:371`（`gf_text_get_utf8_line`）：Stack-buffer-overflow READ 1。PoC 经 `txtin_probe_duration` → `gf_text_get_utf8_line` 进入，栈深 9 帧；修复为 fix buffer overflow on utf8 conversion（src/filters/load_text.c，+1/-1 行）。",
+   "patch": "patches/a616b4fa0a73ff57eff65fcc6beba6b79260a4fd.patch"
   },
   {
-   "id": 42532480,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "Stack-buffer-overflow WRITE {*}",
-   "severity": "High",
-   "cwe": "CWE-121",
+   "id": "42532480",
+   "type": {
+    "crash_type": "Stack-buffer-overflow WRITE {*}",
+    "cwe": "CWE-121",
+    "cwe_name": "Stack-based Buffer Overflow"
+   },
    "location": {
     "file": "src/filter_core/filter.c",
     "line": 1048,
@@ -1076,22 +1065,21 @@
      }
     ]
    },
-   "fix_commit": "523f9e5bb8a7a6e82977f8e7c3cf20ee039edfdd",
-   "fix_subject": "fix buffer overflow on strcpy",
-   "patch": "patches/42532480.patch",
-   "files_touched": [
-    "src/filter_core/filter.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42532480"
+   "code_snippet": {
+    "before": "\tif (sep && ((sep[5]==sess->sep_args) || (sep[5]==0)))\n\t\treturn sep;\n\t//for local files, check if file/dir exists for each ':' specified\n\t//this allows for file path with ':' \n\tif (!strncmp(path, \"file://\", 7) || !strstr(path, \"://\")) {\n\t\tsep = (char*)res;\n\t\twhile (1) {",
+    "after": "\tif (sep && ((sep[5]==sess->sep_args) || (sep[5]==0)))\n\t\treturn sep;\n\t//for local files, check if file/dir exists for each ':' specified\n\t//this allows for file path with ':'\n\tif (!strncmp(path, \"file://\", 7) || !strstr(path, \"://\")) {\n\t\tsep = (char*)res;\n\t\twhile (1) {",
+    "fix_summary": "filter_solve_prop_template：fix buffer overflow on strcpy（+1/-1 行，4 个 hunk）"
+   },
+   "description": "`src/filter_core/filter.c:1048`（`filter_solve_prop_template`）：Stack-buffer-overflow WRITE {*}。PoC 经 `gf_filter_parse_prop_solve_env_var` → `filter_solve_prop_template` 进入，栈深 10 帧；修复为 fix buffer overflow on strcpy（src/filter_core/filter.c，+1/-1 行）。",
+   "patch": "patches/523f9e5bb8a7a6e82977f8e7c3cf20ee039edfdd.patch"
   },
   {
-   "id": 42532576,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "Heap-buffer-overflow READ 1",
-   "severity": "Medium",
-   "cwe": "CWE-125",
+   "id": "42532576",
+   "type": {
+    "crash_type": "Heap-buffer-overflow READ 1",
+    "cwe": "CWE-125",
+    "cwe_name": "Out-of-bounds Read"
+   },
    "location": {
     "file": "src/utils/alloc.c",
     "line": 170,
@@ -1139,22 +1127,21 @@
      }
     ]
    },
-   "fix_commit": "58449f859fed66444122465519f03bc3fcc97382",
-   "fix_subject": "fixed possible heap overflow when parsing broken m3u8",
-   "patch": "patches/42532576.patch",
-   "files_touched": [
-    "src/media_tools/m3u8.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42532576"
+   "code_snippet": {
+    "before": "\t\t\t\t} else {\n\t\t\t\t\tGF_LOG(GF_LOG_WARNING, GF_LOG_DASH,(\"[M3U8] Misformed #EXT-X-MEDIA:LANGUAGE=%s. Quotes are incorrect.\\n\", ret[i]+5));\n\t\t\t\t}\n\t\t\t} else if (safe_start_equals(\"NAME=\", ret[i])) {\n\t\t\t\tif (attributes->name) gf_free(attributes->name);\n\t\t\t\tattributes->name = gf_strdup(ret[i]+5+1);\n\t\t\t\tu32 len = (u32) strlen(attributes->name);",
+    "after": "\t\t\t\t} else {\n\t\t\t\t\tGF_LOG(GF_LOG_WARNING, GF_LOG_DASH,(\"[M3U8] Misformed #EXT-X-MEDIA:LANGUAGE=%s. Quotes are incorrect.\\n\", ret[i]+5));\n\t\t\t\t}\n\t\t\t} else if (safe_start_equals(\"NAME=\\\"\", ret[i])) {\n\t\t\t\tif (attributes->name) gf_free(attributes->name);\n\t\t\t\tattributes->name = gf_strdup(ret[i]+5+1);\n\t\t\t\tu32 len = (u32) strlen(attributes->name);",
+    "fix_summary": "gf_strdup：fixed possible heap overflow when parsing broken m3u8（+1/-1 行）"
+   },
+   "description": "`src/utils/alloc.c:170`（`gf_strdup`）：Heap-buffer-overflow READ 1。PoC 经 `parse_attributes` → `gf_strdup` 进入，栈深 10 帧；修复为 fixed possible heap overflow when parsing broken m3u8（src/media_tools/m3u8.c，+1/-1 行）。",
+   "patch": "patches/58449f859fed66444122465519f03bc3fcc97382.patch"
   },
   {
-   "id": 42532587,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "Heap-buffer-overflow READ 2",
-   "severity": "Medium",
-   "cwe": "CWE-125",
+   "id": "42532587",
+   "type": {
+    "crash_type": "Heap-buffer-overflow READ 2",
+    "cwe": "CWE-125",
+    "cwe_name": "Out-of-bounds Read"
+   },
    "location": {
     "file": "src/filters/reframe_mpgvid.c",
     "line": 428,
@@ -1202,22 +1189,21 @@
      }
     ]
    },
-   "fix_commit": "e95b4f1815c6e70a92953d464eab30c8457a9ad8",
-   "fix_subject": "fix string reading overflow in mpgviddmx",
-   "patch": "patches/42532587.patch",
-   "files_touched": [
-    "src/filters/reframe_mpgvid.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42532587"
+   "code_snippet": {
+    "before": "\t\t\tchar *frame = dcfg;\n\t\t\twhile ((i+3<vosh_size)  && ((frame[i]!=0) || (frame[i+1]!=0) || (frame[i+2]!=1))) i++;\n\t\t\tif (i+4>=vosh_size) break;\n\t\t\tif (strncmp(frame+i+4, \"DivX\", 4)) {\n\t\t\t\ti += 4;\n\t\t\t\tcontinue;\n\t\t\t}",
+    "after": "\t\t\tchar *frame = dcfg;\n\t\t\twhile ((i+3<vosh_size)  && ((frame[i]!=0) || (frame[i+1]!=0) || (frame[i+2]!=1))) i++;\n\t\t\tif (i+4>=vosh_size) break;\n\t\t\tif (i+8 < vosh_size && strncmp(frame+i+4, \"DivX\", 4)) {\n\t\t\t\ti += 4;\n\t\t\t\tcontinue;\n\t\t\t}",
+    "fix_summary": "mpgviddmx_check_pid：fix string reading overflow in mpgviddmx（+1/-1 行）"
+   },
+   "description": "`src/filters/reframe_mpgvid.c:428`（`mpgviddmx_check_pid`）：Heap-buffer-overflow READ 2。PoC 经 `mpgviddmx_process` → `mpgviddmx_check_pid` 进入，栈深 10 帧；修复为 fix string reading overflow in mpgviddmx（src/filters/reframe_mpgvid.c，+1/-1 行）。",
+   "patch": "patches/e95b4f1815c6e70a92953d464eab30c8457a9ad8.patch"
   },
   {
-   "id": 42532601,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "ubsan",
-   "crash_type": "Index-out-of-bounds",
-   "severity": "Medium",
-   "cwe": "CWE-129",
+   "id": "42532601",
+   "type": {
+    "crash_type": "Index-out-of-bounds",
+    "cwe": "CWE-129",
+    "cwe_name": "Improper Validation of Array Index"
+   },
    "location": {
     "file": "src/ietf/sdp.c",
     "line": 625,
@@ -1249,22 +1235,21 @@
      }
     ]
    },
-   "fix_commit": "ecfe062ed5a110b1577eb1abf2342403b402b227",
-   "fix_subject": "prevent Index-out-of-bounds in gf_sdp_info_parse",
-   "patch": "patches/42532601.patch",
-   "files_touched": [
-    "src/ietf/sdp.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42532601"
+   "code_snippet": {
+    "before": "\t\t\twhile (1) {\n\t\t\t\tpos = gf_token_get(LineBuf, pos, \" \\t\\r\\n\", comp, 3000);\n\t\t\t\tif (pos <= 0) break;\n\t\t\t\ttiming->AdjustmentTime[timing->NbZoneOffsets] = atoi(comp);\n\t\t\t\tpos = gf_token_get(LineBuf, pos, \" \\t\\r\\n\", comp, 3000);\n\t\t\t\ttiming->AdjustmentOffset[timing->NbZoneOffsets] = SDP_MakeSeconds(comp);\n\t\t\t\ttiming->NbZoneOffsets += 1;\n\t\t\t\tif (timing->NbZoneOffsets == GF_SDP_MAX_TIMEOFFSET) break;\n\t\t\t}\n\t\t\tbreak;\n\t\tcase 'k':",
+    "after": "\t\t\twhile (1) {\n\t\t\t\tpos = gf_token_get(LineBuf, pos, \" \\t\\r\\n\", comp, 3000);\n\t\t\t\tif (pos <= 0) break;\n\t\t\t\tif (timing->NbZoneOffsets >= GF_SDP_MAX_TIMEOFFSET) break;\n\t\t\t\ttiming->AdjustmentTime[timing->NbZoneOffsets] = atoi(comp);\n\t\t\t\tpos = gf_token_get(LineBuf, pos, \" \\t\\r\\n\", comp, 3000);\n\t\t\t\ttiming->AdjustmentOffset[timing->NbZoneOffsets] = SDP_MakeSeconds(comp);\n\t\t\t\ttiming->NbZoneOffsets += 1;\n\t\t\t}\n\t\t\tbreak;\n\t\tcase 'k':",
+    "fix_summary": "gf_sdp_info_parse：prevent Index-out-of-bounds in gf_sdp_info_parse（+1/-1 行）"
+   },
+   "description": "`src/ietf/sdp.c:625`（`gf_sdp_info_parse`）：Index-out-of-bounds。PoC 经 `rtpin_load_sdp` → `gf_sdp_info_parse` 进入，栈深 6 帧；修复为 prevent Index-out-of-bounds in gf_sdp_info_parse（src/ietf/sdp.c，+1/-1 行）。",
+   "patch": "patches/ecfe062ed5a110b1577eb1abf2342403b402b227.patch"
   },
   {
-   "id": 42532650,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "Stack-buffer-overflow WRITE 1",
-   "severity": "High",
-   "cwe": "CWE-121",
+   "id": "42532650",
+   "type": {
+    "crash_type": "Stack-buffer-overflow WRITE 1",
+    "cwe": "CWE-121",
+    "cwe_name": "Stack-based Buffer Overflow"
+   },
    "location": {
     "file": "src/ietf/rtsp_session.c",
     "line": 120,
@@ -1312,22 +1297,21 @@
      }
     ]
    },
-   "fix_commit": "00eb62012dbcf7154e5abc4704051e9c604680e9",
-   "fix_subject": "prevent stack overflow in RTSP_UnpackURL",
-   "patch": "patches/42532650.patch",
-   "files_touched": [
-    "src/ietf/rtsp_session.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42532650"
+   "code_snippet": {
+    "before": "\tif (retest && strstr(retest, \"/\")) {\n\t\tretest += 1;\n\t\ti=0;\n\t\twhile (i<strlen(retest)) {\n\t\t\tif (retest[i] == '/') break;\n\t\t\ttext[i] = retest[i];\n\t\t\ti += 1;",
+    "after": "\tif (retest && strstr(retest, \"/\")) {\n\t\tretest += 1;\n\t\ti=0;\n\t\twhile (i<strlen(retest) && i<1023) {\n\t\t\tif (retest[i] == '/') break;\n\t\t\ttext[i] = retest[i];\n\t\t\ti += 1;",
+    "fix_summary": "RTSP_UnpackURL：prevent stack overflow in RTSP_UnpackURL（+1/-1 行，3 个 hunk）"
+   },
+   "description": "`src/ietf/rtsp_session.c:120`（`RTSP_UnpackURL`）：Stack-buffer-overflow WRITE 1。PoC 经 `gf_rtsp_session_new` → `RTSP_UnpackURL` 进入，栈深 10 帧；修复为 prevent stack overflow in RTSP_UnpackURL（src/ietf/rtsp_session.c，+1/-1 行）。",
+   "patch": "patches/00eb62012dbcf7154e5abc4704051e9c604680e9.patch"
   },
   {
-   "id": 42532685,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "UNKNOWN WRITE",
-   "severity": "High",
-   "cwe": "CWE-787",
+   "id": "42532685",
+   "type": {
+    "crash_type": "UNKNOWN WRITE",
+    "cwe": "CWE-787",
+    "cwe_name": "Out-of-bounds Write"
+   },
    "location": {
     "file": "src/filter_core/filter.c",
     "line": 2971,
@@ -1347,22 +1331,21 @@
      }
     ]
    },
-   "fix_commit": "1337ebdfcb28204f39db2b464ed43434dd8623dd",
-   "fix_subject": "reframe_img: add int overflow check on image dimensions",
-   "patch": "patches/42532685.patch",
-   "files_touched": [
-    "src/filters/reframe_img.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42532685"
+   "code_snippet": {
+    "before": "{\n\tGF_ReframeImgCtx *ctx = gf_filter_get_udta(filter);\n\tconst GF_PropertyValue *p;\n\t\n\tif (is_remove) {\n\t\tctx->ipid = NULL;\n\t\treturn GF_OK;",
+    "after": "{\n\tGF_ReframeImgCtx *ctx = gf_filter_get_udta(filter);\n\tconst GF_PropertyValue *p;\n\n\tif (is_remove) {\n\t\tctx->ipid = NULL;\n\t\treturn GF_OK;",
+    "fix_summary": "gf_filter_process_task：reframe_img: add int overflow check on image dimensions（+1/-1 行，5 个 hunk）"
+   },
+   "description": "`src/filter_core/filter.c:2971`（`gf_filter_process_task`）：UNKNOWN WRITE。PoC 经 `gf_fs_thread_proc` → `gf_filter_process_task` 进入，栈深 3 帧；修复为 reframe_img: add int overflow check on image dimensions（src/filters/reframe_img.c，+1/-1 行）。",
+   "patch": "patches/1337ebdfcb28204f39db2b464ed43434dd8623dd.patch"
   },
   {
-   "id": 42532961,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "Heap-buffer-overflow READ 8",
-   "severity": "Medium",
-   "cwe": "CWE-125",
+   "id": "42532961",
+   "type": {
+    "crash_type": "Heap-buffer-overflow READ 8",
+    "cwe": "CWE-125",
+    "cwe_name": "Out-of-bounds Read"
+   },
    "location": {
     "file": "src/media_tools/av_parsers.c",
     "line": 9884,
@@ -1410,22 +1393,21 @@
      }
     ]
    },
-   "fix_commit": "07c6c799e741a3a7466fc80964703e6f604f38e4",
-   "fix_subject": "check data size in opus parse header",
-   "patch": "patches/42532961.patch",
-   "files_touched": [
-    "src/media_tools/av_parsers.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42532961"
+   "code_snippet": {
+    "before": "        return 0;\n    if (!header)\n        return 0;\n    if (!memcmp(data, \"OpusHead\", sizeof(char)*8))\n        return 0;\n    if (!memcmp(data, \"OpusTags\", sizeof(char)*8))\n        return 0;\n\n    GF_LOG(GF_LOG_DEBUG, GF_LOG_CODING, (\"Processing Opus packet, self: %d, size %d\\n\", self_delimited, data_length));",
+    "after": "        return 0;\n    if (!header)\n        return 0;\n    if (data_length>=8 && !memcmp(data, \"OpusHead\", sizeof(char)*8))\n        return 0;\n    if (data_length>=8 && !memcmp(data, \"OpusTags\", sizeof(char)*8))\n        return 0;\n\n    GF_LOG(GF_LOG_DEBUG, GF_LOG_CODING, (\"Processing Opus packet, self: %d, size %d\\n\", self_delimited, data_length));",
+    "fix_summary": "gf_opus_parse_packet_header：check data size in opus parse header（+2/-2 行）"
+   },
+   "description": "`src/media_tools/av_parsers.c:9884`（`gf_opus_parse_packet_header`）：Heap-buffer-overflow READ 8。PoC 经 `gf_inspect_dump_opus_internal` → `gf_opus_parse_packet_header` 进入，栈深 10 帧；修复为 check data size in opus parse header（src/media_tools/av_parsers.c，+2/-2 行）。",
+   "patch": "patches/07c6c799e741a3a7466fc80964703e6f604f38e4.patch"
   },
   {
-   "id": 42533061,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "Stack-buffer-overflow WRITE 1",
-   "severity": "High",
-   "cwe": "CWE-121",
+   "id": "42533061",
+   "type": {
+    "crash_type": "Stack-buffer-overflow WRITE 1",
+    "cwe": "CWE-121",
+    "cwe_name": "Stack-based Buffer Overflow"
+   },
    "location": {
     "file": "src/media_tools/mpegts.c",
     "line": 2475,
@@ -1473,22 +1455,21 @@
      }
     ]
    },
-   "fix_commit": "08d2d3128f17bd83d534efd708bdaf1248005e9e",
-   "fix_subject": "m2ts prevent string overflow",
-   "patch": "patches/42533061.patch",
-   "files_touched": [
-    "src/media_tools/mpegts.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42533061"
+   "code_snippet": {
+    "before": "\t\t\t\t\t\tchar *_url = URL;\n\t\t\t\t\t\tu8 scheme = gf_bs_read_int(bs, 8);\n\t\t\t\t\t\tu8 url_len = gf_bs_read_int(bs, 8);\n\t\t\t\t\t\tswitch (scheme) {\n\t\t\t\t\t\tcase 1:\n\t\t\t\t\t\t\tstrcpy(URL, \"http://\");\n\t\t\t\t\t\t\t_url = URL+7;\n\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\tcase 2:\n\t\t\t\t\t\t\tstrcpy(URL, \"https://\");\n\t\t\t\t\t\t\t_url = URL+8;\n\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tgf_bs_read_data(bs, _url, url_len);\n\t\t\t\t\t\t_url[url_len >= GF_ARRAY_LENGTH(URL) ? GF_ARRAY_LENGTH(URL)-1 : url_len] = 0;\n\t\t\t\t\t}\n\t\t\t\t\ttemi_loc.external_URL = URL;\n",
+    "after": "\t\t\t\t\t\tchar *_url = URL;\n\t\t\t\t\t\tu8 scheme = gf_bs_read_int(bs, 8);\n\t\t\t\t\t\tu8 url_len = gf_bs_read_int(bs, 8);\n\t\t\t\t\t\tu8 scheme_len = 0;\n\t\t\t\t\t\tswitch (scheme) {\n\t\t\t\t\t\tcase 1:\n\t\t\t\t\t\t\tstrcpy(URL, \"http://\");\n\t\t\t\t\t\t\tscheme_len = 7;\n\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\tcase 2:\n\t\t\t\t\t\t\tstrcpy(URL, \"https://\");\n\t\t\t\t\t\t\tscheme_len = 8;\n\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\t}\n\t\t\t\t\t\t_url = URL + scheme_len;\n\t\t\t\t\t\tgf_bs_read_data(bs, _url, url_len);\n\t\t\t\t\t\t_url[MIN(url_len, GF_ARRAY_LENGTH(URL)-1-scheme_len)] = 0;\n\t\t\t\t\t}\n\t\t\t\t\ttemi_loc.external_URL = URL;\n",
+    "fix_summary": "gf_m2ts_get_adaptation_field：m2ts prevent string overflow（+5/-3 行）"
+   },
+   "description": "`src/media_tools/mpegts.c:2475`（`gf_m2ts_get_adaptation_field`）：Stack-buffer-overflow WRITE 1。PoC 经 `gf_m2ts_process_packet` → `gf_m2ts_get_adaptation_field` 进入，栈深 10 帧；修复为 m2ts prevent string overflow（src/media_tools/mpegts.c，+5/-3 行）。",
+   "patch": "patches/08d2d3128f17bd83d534efd708bdaf1248005e9e.patch"
   },
   {
-   "id": 42533223,
-   "project": "gpac",
-   "target": "fuzz_probe_analyze",
-   "sanitizer": "asan",
-   "crash_type": "Heap-buffer-overflow READ 1",
-   "severity": "Medium",
-   "cwe": "CWE-125",
+   "id": "42533223",
+   "type": {
+    "crash_type": "Heap-buffer-overflow READ 1",
+    "cwe": "CWE-125",
+    "cwe_name": "Out-of-bounds Read"
+   },
    "location": {
     "file": "src/filters/inspect.c",
     "line": 201,
@@ -1536,22 +1517,21 @@
      }
     ]
    },
-   "fix_commit": "5a83f50fe9a6cd513029e37cc723ae53c01807c3",
-   "fix_subject": "inspect: check size against nalu_size_length",
-   "patch": "patches/42533223.patch",
-   "files_touched": [
-    "src/filters/inspect.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42533223"
+   "code_snippet": {
+    "before": "\t\t\t}\n\t\t}\n\t\twhile (size) {\n\t\t\tu32 nal_size = inspect_get_nal_size((char*)data, pctx->nalu_size_length);\n\t\t\tdata += pctx->nalu_size_length;\n",
+    "after": "\t\t\t}\n\t\t}\n\t\twhile (size) {\n\t\t\tif (size < pctx->nalu_size_length) {\n\t\t\t\tinspect_printf(dump, \"   <!-- NALU is corrupted: nalu_size_length is %u but only %d remains -->\\n\", pctx->nalu_size_length, size);\n\t\t\t\tbreak;\n\t\t\t}\n\t\t\tu32 nal_size = inspect_get_nal_size((char*)data, pctx->nalu_size_length);\n\t\t\tdata += pctx->nalu_size_length;\n",
+    "fix_summary": "inspect_get_nal_size：inspect: check size against nalu_size_length（+4/-0 行）"
+   },
+   "description": "`src/filters/inspect.c:201`（`inspect_get_nal_size`）：Heap-buffer-overflow READ 1。PoC 经 `inspect_dump_packet` → `inspect_get_nal_size` 进入，栈深 10 帧；修复为 inspect: check size against nalu_size_length（src/filters/inspect.c，+4/-0 行）。",
+   "patch": "patches/5a83f50fe9a6cd513029e37cc723ae53c01807c3.patch"
   },
   {
-   "id": 42533348,
-   "project": "gpac",
-   "target": "fuzz_parse",
-   "sanitizer": "asan",
-   "crash_type": "Heap-buffer-overflow WRITE 1",
-   "severity": "High",
-   "cwe": "CWE-787",
+   "id": "42533348",
+   "type": {
+    "crash_type": "Heap-buffer-overflow WRITE 1",
+    "cwe": "CWE-787",
+    "cwe_name": "Out-of-bounds Write"
+   },
    "location": {
     "file": "src/utils/base_encoding.c",
     "line": 300,
@@ -1599,36 +1579,13 @@
      }
     ]
    },
-   "fix_commit": "ff627002687235bc6c585fc7ce24137cc6eeb73b",
-   "fix_subject": "gz_uncompress: add size check",
-   "patch": "patches/42533348.patch",
-   "files_touched": [
-    "src/utils/base_encoding.c"
-   ],
-   "report": "https://issues.oss-fuzz.com/issues/42533348"
+   "code_snippet": {
+    "before": "\t\t\td_stream.avail_out = (u32) (size - d_stream.total_out);\n\t\t\td_stream.next_out = (Bytef*) ( *uncompressed_data + d_stream.total_out);\n\t\t}\n\t\t*out_size = (u32) d_stream.total_out;\n\t\tinflateEnd(&d_stream);\n\t\t//force last byte to 0\n\t\t(*uncompressed_data)[*out_size] = 0;",
+    "after": "\t\t\td_stream.avail_out = (u32) (size - d_stream.total_out);\n\t\t\td_stream.next_out = (Bytef*) ( *uncompressed_data + d_stream.total_out);\n\t\t}\n\t\t*out_size = MIN( (size?size-1:0) , (u32) d_stream.total_out );\n\t\tinflateEnd(&d_stream);\n\t\t//force last byte to 0\n\t\t(*uncompressed_data)[*out_size] = 0;",
+    "fix_summary": "gf_gz_decompress_payload_ex：gz_uncompress: add size check（+1/-1 行）"
+   },
+   "description": "`src/utils/base_encoding.c:300`（`gf_gz_decompress_payload_ex`）：Heap-buffer-overflow WRITE 1。PoC 经 `gf_isom_box_parse_ex` → `gf_gz_decompress_payload_ex` 进入，栈深 10 帧；修复为 gz_uncompress: add size check（src/utils/base_encoding.c，+1/-1 行）。",
+   "patch": "patches/ff627002687235bc6c585fc7ce24137cc6eeb73b.patch"
   }
- ],
- "verification": {
-  "baseline_run": "reports/baseline-run.log",
-  "baseline_crash": 27,
-  "one_by_one": "reports/verify-one-by-one.json",
-  "one_by_one_pass": 27,
-  "dropped_before_delivery": [
-   42532225,
-   42533590,
-   42533608,
-   42532896,
-   42532983,
-   42533242
-  ],
-  "dropped_by_one_by_one": [
-   42532226,
-   42532406,
-   42532845,
-   42533013,
-   42533592,
-   42533693
-  ],
-  "dropped_note": "before: PoC did not crash the baseline (defect newer than the baseline) or the fix could not be expressed against it; at one-by-one: the patch applied but the PoC kept crashing, i.e. the recorded fix_commit does not cover the code path the PoC exercises"
- }
+ ]
 }

@@ -1,30 +1,31 @@
-# localId	target	sanitizer	expect	poc	patch	fix_commit	subject
-# One row per ARVO case; every column is checked by verify.sh /
-# verify-one-by-one.sh.  expect=CRASH on the delivered tree.
-42531304	fuzz_probe_analyze	asan	CRASH	pocs/42531304/poc	patches/42531304.patch	538b229cab5e	fixed potential crash in ghi demux init
-42531317	fuzz_probe_analyze	asan	CRASH	pocs/42531317/poc	patches/42531317.patch	8a6e53e52313	fixed possible mem overread
-42531339	fuzz_probe_analyze	asan	CRASH	pocs/42531339/poc	patches/42531339.patch	4786c169258f	fixed potential crash parsing broken vtt files
-42531361	fuzz_probe_analyze	ubsan	CRASH	pocs/42531361/poc	patches/42531361.patch	170631255f55	fixed possible crash in vvc tile parsing of corrupted streams
-42531371	fuzz_probe_analyze	asan	CRASH	pocs/42531371/poc	patches/42531371.patch	067bef954869	fixed potential overflow in token read with broken sdp
-42531432	fuzz_probe_analyze	ubsan	CRASH	pocs/42531432/poc	patches/42531432.patch	14ecc478ad48	fixed index out of band in hevc ref pics with broken streams
-42531500	fuzz_probe_analyze	ubsan	CRASH	pocs/42531500/poc	patches/42531500.patch	c3ce6dd423aa	fixed bug in vorbis header parsing
-42531925	fuzz_probe_analyze	asan	CRASH	pocs/42531925/poc	patches/42531925.patch	0ff40625b602	fixed potential crash in unix domain sockets with broken adresses
-42532144	fuzz_probe_analyze	asan	CRASH	pocs/42532144/poc	patches/42532144.patch	593d9afa9db7	fixed possible crash parsing cover art in broken id3tag
-42532171	fuzz_probe_analyze	asan	CRASH	pocs/42532171/poc	patches/42532171.patch	25ca355f14a2	fixed possible memcpy overlap in rfmpegvid
-42532195	fuzz_probe_analyze	asan	CRASH	pocs/42532195/poc	patches/42532195.patch	52da2ef6b33c	fixed possible stack overflow with broken rtsp urls
-42532224	fuzz_probe_analyze	ubsan	CRASH	pocs/42532224/poc	patches/42532224.patch	3e71b0ddc863	fixed potential crash in broken sdp parsing
-42532234	fuzz_probe_analyze	asan	CRASH	pocs/42532234/poc	patches/42532234.patch	964e268f0bf9	fixed possible heap iverflow with broken m3u8 parsing
-42532309	fuzz_probe_analyze	asan	CRASH	pocs/42532309/poc	patches/42532309.patch	17d14c6a4f2c	fixed possible heap overfow in mp3 reframer
-42532326	fuzz_probe_analyze	asan	CRASH	pocs/42532326/poc	patches/42532326.patch	fe46265eda43	fixed possible use after free in broken ogg streams
-42532370	fuzz_probe_analyze	ubsan	CRASH	pocs/42532370/poc	patches/42532370.patch	a793966c6f4b	fix array overflow on hevc weights
-42532396	fuzz_probe_analyze	asan	CRASH	pocs/42532396/poc	patches/42532396.patch	a616b4fa0a73	fix buffer overflow on utf8 conversion
-42532480	fuzz_probe_analyze	asan	CRASH	pocs/42532480/poc	patches/42532480.patch	523f9e5bb8a7	fix buffer overflow on strcpy
-42532576	fuzz_probe_analyze	asan	CRASH	pocs/42532576/poc	patches/42532576.patch	58449f859fed	fixed possible heap overflow when parsing broken m3u8
-42532587	fuzz_probe_analyze	asan	CRASH	pocs/42532587/poc	patches/42532587.patch	e95b4f1815c6	fix string reading overflow in mpgviddmx
-42532601	fuzz_probe_analyze	ubsan	CRASH	pocs/42532601/poc	patches/42532601.patch	ecfe062ed5a1	prevent Index-out-of-bounds in gf_sdp_info_parse
-42532650	fuzz_probe_analyze	asan	CRASH	pocs/42532650/poc	patches/42532650.patch	00eb62012dbc	prevent stack overflow in RTSP_UnpackURL
-42532685	fuzz_probe_analyze	asan	CRASH	pocs/42532685/poc	patches/42532685.patch	1337ebdfcb28	reframe_img: add int overflow check on image dimensions
-42532961	fuzz_probe_analyze	asan	CRASH	pocs/42532961/poc	patches/42532961.patch	07c6c799e741	check data size in opus parse header
-42533061	fuzz_probe_analyze	asan	CRASH	pocs/42533061/poc	patches/42533061.patch	08d2d3128f17	m2ts prevent string overflow
-42533223	fuzz_probe_analyze	asan	CRASH	pocs/42533223/poc	patches/42533223.patch	5a83f50fe9a6	inspect: check size against nalu_size_length
-42533348	fuzz_parse	asan	CRASH	pocs/42533348/poc	patches/42533348.patch	ff6270026872	gz_uncompress: add size check
+# localId	fuzzer	sanitizer	alert	expect_frame	poc	patch	fix_commit
+# One row per ARVO case; every case is one PoC run against the single baseline tree
+# (/src/gpac at upstream b890f1c443dbe1f941cd326d4473ce7ddef8e256).
+# expect_frame is the frame the report names; alert is the sanitizer's own wording.
+42531304	fuzz_probe_analyze	asan	Heap-buffer-overflow READ {*}	xml_sax_append_string	pocs/42531304/poc	patches/538b229cab5e6317053c15c66417a9d053681ad0.patch	538b229cab5e6317053c15c66417a9d053681ad0
+42531317	fuzz_probe_analyze	asan	Heap-buffer-overflow READ 1	gf_url_to_fs_path	pocs/42531317/poc	patches/8a6e53e5231354b52feaffc02eae48204303157d.patch	8a6e53e5231354b52feaffc02eae48204303157d
+42531339	fuzz_probe_analyze	asan	Stack-buffer-overflow READ {*}	gf_strdup	pocs/42531339/poc	patches/4786c169258fcf4adfeafe03e09c1f214c0d09cf.patch	4786c169258fcf4adfeafe03e09c1f214c0d09cf
+42531361	fuzz_probe_analyze	ubsan	Index-out-of-bounds	vvc_get_ctb_info_in_slice	pocs/42531361/poc	patches/170631255f5504243b34323d61edb60b2dfbce51.patch	170631255f5504243b34323d61edb60b2dfbce51
+42531371	fuzz_probe_analyze	asan	Stack-buffer-overflow WRITE 1	gf_token_get_line	pocs/42531371/poc	patches/067bef9548698847fe9126308626e672e1ecab75.patch	067bef9548698847fe9126308626e672e1ecab75
+42531432	fuzz_probe_analyze	ubsan	Index-out-of-bounds	hevc_parse_short_term_ref_pic_set	pocs/42531432/poc	patches/14ecc478ad48b4df8b0892a7f25cae90a714f059.patch	14ecc478ad48b4df8b0892a7f25cae90a714f059
+42531500	fuzz_probe_analyze	ubsan	Index-out-of-bounds	oggpack_read	pocs/42531500/poc	patches/c3ce6dd423aa459de3690016833ed740df54f989.patch	c3ce6dd423aa459de3690016833ed740df54f989
+42531925	fuzz_probe_analyze	asan	Stack-buffer-overflow WRITE {*}	gf_sk_connect	pocs/42531925/poc	patches/0ff40625b602590afffb383ab03d155e0ba509ed.patch	0ff40625b602590afffb383ab03d155e0ba509ed
+42532144	fuzz_probe_analyze	asan	Heap-buffer-overflow READ {*}	gf_props_assign_value	pocs/42532144/poc	patches/593d9afa9db74a83909c4c1f1d27c9f4289e96c7.patch	593d9afa9db74a83909c4c1f1d27c9f4289e96c7
+42532171	fuzz_probe_analyze	asan	Memcpy-param-overlap	mpgviddmx_process	pocs/42532171/poc	patches/25ca355f14a28baeb6afd911ca7ae66deb37a1ac.patch	25ca355f14a28baeb6afd911ca7ae66deb37a1ac
+42532195	fuzz_probe_analyze	asan	Stack-buffer-overflow WRITE 1	RTSP_UnpackURL	pocs/42532195/poc	patches/52da2ef6b33c26d4ffd72d1d4ae6c42631ea433f.patch	52da2ef6b33c26d4ffd72d1d4ae6c42631ea433f
+42532224	fuzz_probe_analyze	ubsan	Index-out-of-bounds	gf_sdp_info_parse	pocs/42532224/poc	patches/3e71b0ddc8632b8eea4424a4facb09e47ea353ba.patch	3e71b0ddc8632b8eea4424a4facb09e47ea353ba
+42532234	fuzz_probe_analyze	asan	Heap-buffer-overflow READ 8	gf_m3u8_parse_sub_playlist	pocs/42532234/poc	patches/964e268f0bf975b881f322ff6d9dd53957fa837d.patch	964e268f0bf975b881f322ff6d9dd53957fa837d
+42532309	fuzz_probe_analyze	asan	Heap-buffer-overflow READ 1	mp3_dmx_process	pocs/42532309/poc	patches/17d14c6a4f2c3f904a2065a07ef3ae915f78c2df.patch	17d14c6a4f2c3f904a2065a07ef3ae915f78c2df
+42532326	fuzz_probe_analyze	asan	Heap-use-after-free READ 1	oggdmx_get_stream_info	pocs/42532326/poc	patches/fe46265eda4375086374ed41a4bb7f3906ced4ca.patch	fe46265eda4375086374ed41a4bb7f3906ced4ca
+42532370	fuzz_probe_analyze	ubsan	Index-out-of-bounds	hevc_pred_weight_table	pocs/42532370/poc	patches/a793966c6f4b11ad495d5fbca12f01ae787c767f.patch	a793966c6f4b11ad495d5fbca12f01ae787c767f
+42532396	fuzz_probe_analyze	asan	Stack-buffer-overflow READ 1	gf_text_get_utf8_line	pocs/42532396/poc	patches/a616b4fa0a73ff57eff65fcc6beba6b79260a4fd.patch	a616b4fa0a73ff57eff65fcc6beba6b79260a4fd
+42532480	fuzz_probe_analyze	asan	Stack-buffer-overflow WRITE {*}	filter_solve_prop_template	pocs/42532480/poc	patches/523f9e5bb8a7a6e82977f8e7c3cf20ee039edfdd.patch	523f9e5bb8a7a6e82977f8e7c3cf20ee039edfdd
+42532576	fuzz_probe_analyze	asan	Heap-buffer-overflow READ 1	gf_strdup	pocs/42532576/poc	patches/58449f859fed66444122465519f03bc3fcc97382.patch	58449f859fed66444122465519f03bc3fcc97382
+42532587	fuzz_probe_analyze	asan	Heap-buffer-overflow READ 2	mpgviddmx_check_pid	pocs/42532587/poc	patches/e95b4f1815c6e70a92953d464eab30c8457a9ad8.patch	e95b4f1815c6e70a92953d464eab30c8457a9ad8
+42532601	fuzz_probe_analyze	ubsan	Index-out-of-bounds	gf_sdp_info_parse	pocs/42532601/poc	patches/ecfe062ed5a110b1577eb1abf2342403b402b227.patch	ecfe062ed5a110b1577eb1abf2342403b402b227
+42532650	fuzz_probe_analyze	asan	Stack-buffer-overflow WRITE 1	RTSP_UnpackURL	pocs/42532650/poc	patches/00eb62012dbcf7154e5abc4704051e9c604680e9.patch	00eb62012dbcf7154e5abc4704051e9c604680e9
+42532685	fuzz_probe_analyze	asan	UNKNOWN WRITE	gf_filter_process_task	pocs/42532685/poc	patches/1337ebdfcb28204f39db2b464ed43434dd8623dd.patch	1337ebdfcb28204f39db2b464ed43434dd8623dd
+42532961	fuzz_probe_analyze	asan	Heap-buffer-overflow READ 8	gf_opus_parse_packet_header	pocs/42532961/poc	patches/07c6c799e741a3a7466fc80964703e6f604f38e4.patch	07c6c799e741a3a7466fc80964703e6f604f38e4
+42533061	fuzz_probe_analyze	asan	Stack-buffer-overflow WRITE 1	gf_m2ts_get_adaptation_field	pocs/42533061/poc	patches/08d2d3128f17bd83d534efd708bdaf1248005e9e.patch	08d2d3128f17bd83d534efd708bdaf1248005e9e
+42533223	fuzz_probe_analyze	asan	Heap-buffer-overflow READ 1	inspect_get_nal_size	pocs/42533223/poc	patches/5a83f50fe9a6cd513029e37cc723ae53c01807c3.patch	5a83f50fe9a6cd513029e37cc723ae53c01807c3
+42533348	fuzz_parse	asan	Heap-buffer-overflow WRITE 1	gf_gz_decompress_payload_ex	pocs/42533348/poc	patches/ff627002687235bc6c585fc7ce24137cc6eeb73b.patch	ff627002687235bc6c585fc7ce24137cc6eeb73b

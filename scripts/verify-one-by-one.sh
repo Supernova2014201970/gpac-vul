@@ -1,45 +1,55 @@
 #!/bin/bash
-# Every case, both sides, one build per case: the attribution check behind
-# cases.tsv.  For each row it rebuilds the patched tree and asserts
+# The attribution run: every case with its own patch applied, one at a time.
 #
-#   baseline + PoC -> CRASH        (the bug is in the delivered tree)
-#   patch    + PoC -> CLEAN        (this patch is what clears it)
+#   verify-one-by-one.sh [--report DIR] [--tree DIR]
 #
-#   verify-one-by-one.sh [--tree DIR] [--report DIR] [--case ID]...
+# --tree DIR — source tree to copy and patch; default /src/gpac (or
+#   $GPDT_TREE).  The tree itself is never modified.
+# For every case of /payload/cases.tsv: apply exactly that case's patch to a copy
+# of the tree, build it, run that PoC.  `pass` is true when the sanitizer no
+# longer reports, which is what every entry and the top-level `pass` should be.
+# Writes DIR/verify-one-by-one.json (`patch` is the patch file name, no
+# directory) and prints `pass=N fail=M`.  Costs one build per case — the patched
+# tree reuses the baseline build directory and only recompiles the files the
+# patch touched, so a case is minutes rather than a full gpac build.
 set -uo pipefail
-. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
+. "$(dirname "$0")/lib.sh"
 
-cases_file=${PAYLOAD:?}/cases.tsv
-report_dir=/reports
-want=()
-while [ $# -gt 0 ]; do
-  case $1 in
-    --tree) TREE=${2:?}; shift 2 ;;
-    --case) want+=("${2:?}"); shift 2 ;;
-    --report) report_dir=${2:?}; shift 2 ;;
-    -h|--help) sed -n '2,11p' "$0"; exit 0 ;;
-    *) die "unknown argument $1" ;;
-  esac
-done
-mkdir -p "$report_dir"
-json="$report_dir/verify-one-by-one.json"
-printf '{\n  "src_fp": "%s",\n  "cases": [\n' "$(src_fp "$TREE")" > "$json"
+report=reports; src=$TREE
+while [ $# -gt 0 ]; do case "$1" in
+  --report) report=${2:?}; shift 2 ;;
+  --tree) src=${2:?}; shift 2 ;;
+  -h|--help) sed -n '2,14p' "$0"; exit 0 ;;
+  *) die "unknown argument: $1" ;;
+esac; done
+[ -d "$src" ] || die "no such source tree: $src"
 
-first=1 pass=0 fail=0
-while IFS=$'\t' read -r id rest; do
-  [ -n "${id:-}" ] || continue
-  case $id in \#*) continue ;; esac
-  if [ ${#want[@]} -gt 0 ]; then
-    printf '%s\n' "${want[@]}" | grep -qx "$id" || continue
-  fi
-  out=$("$GPDT_HOME/verify-one.sh" --case "$id" --tree "$TREE" --report "$report_dir" 2>&1)
-  rc=$?
-  [ $first -eq 1 ] || printf ',\n' >> "$json"; first=0
-  printf '%s' "$(printf '%s\n' "$out" | grep -m1 '^{')" >> "$json"
-  if [ $rc -eq 0 ]; then pass=$((pass + 1)); else fail=$((fail + 1)); fi
-  printf '%s\n' "$out" | tail -n 2
-done < <(awk -F'\t' '!/^#/ && NF >= 8 {print $1}' "$cases_file")
+mkdir -p "$report" || die "cannot create $report"
+scrap=$(mktemp -d); trap 'rm -rf "$scrap"' EXIT
+rows="$scrap/rows"; : > "$rows"
 
-printf '\n  ],\n  "pass": %d,\n  "fail": %d\n}\n' "$pass" "$fail" >> "$json"
-printf 'pass %d, fail %d\nreport: %s\n' "$pass" "$fail" "$json"
+pass=0; fail=0
+while IFS=$'\t' read -r id _fuzzer san alert _frame _poc patch _fc; do
+  [ -n "$id" ] || continue
+  if "$GPDT_HOME/verify-one.sh" "$id" --patched --tree "$src" --report "$scrap" > "$scrap/out" 2>&1; then :; fi
+  ok=$(awk -F'\t' '$1 == "RESULT" { print $3 }' "$scrap/out")
+  [ -n "$ok" ] || ok=false
+  if [ "$ok" = true ]; then verdict=PASS; pass=$((pass+1)); else verdict=FAIL; fail=$((fail+1)); fi
+  printf '%s\t%s\t%s\t%s\n' "$id" "${patch##*/}" "$ok" "$alert" >> "$rows"
+  printf '%-4s %-9s %s\n' "$verdict" "$id" "${patch##*/}"
+done < <(awk -F'\t' '!/^#/ && NF >= 8' "$PAYLOAD/cases.tsv")
+
+{
+  printf '{"pass": %s, "fail": %s, "results": [\n' "$pass" "$fail"
+  sep=""
+  while IFS=$'\t' read -r id patch ok alert; do
+    printf '%s  {"poc": "%s", "patch": "%s", "pass": %s, "alert": "%s"}' \
+      "$sep" "$id" "$patch" "$ok" "$alert"
+    sep=$',\n'
+  done < "$rows"
+  printf '\n]}\n'
+} > "$report/verify-one-by-one.json"
+
+printf 'pass=%s fail=%s\n' "$pass" "$fail"
+printf 'report: %s/verify-one-by-one.json\n' "$report"
 [ "$fail" -eq 0 ]

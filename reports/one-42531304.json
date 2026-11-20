@@ -1,1 +1,0 @@
-{"case": 42531304, "patch": "patches/42531304.patch", "sanitizer": "asan", "target": "fuzz_probe_analyze", "baseline": {"verdict": "CRASH", "summary": "==5077==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x622000010489 at pc 0x0000004809b4 bp 0x7fffa1bf6660 sp 0x7fffa1bf5e10"}, "patched": {"verdict": "CLEAN", "summary": "-"}, "pass": true}
