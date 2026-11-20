@@ -1,0 +1,302 @@
+{
+ "42531304": {
+  "patch": "patches/42531304.patch",
+  "mode": "commit-diff",
+  "fix_commit": "538b229cab5e6317053c15c66417a9d053681ad0",
+  "files": [
+   "src/filters/dmx_ghi.c"
+  ],
+  "subject": "fixed potential crash in ghi demux init",
+  "stat": " 1 file changed, 3 insertions(+), 1 deletion(-)",
+  "applies_to_baseline": true
+ },
+ "42531317": {
+  "patch": "patches/42531317.patch",
+  "mode": "commit-diff",
+  "fix_commit": "8a6e53e5231354b52feaffc02eae48204303157d",
+  "files": [
+   "src/utils/url.c"
+  ],
+  "subject": "fixed possible mem overread",
+  "stat": " 1 file changed, 1 insertion(+), 1 deletion(-)",
+  "applies_to_baseline": true
+ },
+ "42531339": {
+  "patch": "patches/42531339.patch",
+  "mode": "commit-diff",
+  "fix_commit": "4786c169258fcf4adfeafe03e09c1f214c0d09cf",
+  "files": [
+   "src/media_tools/webvtt.c"
+  ],
+  "subject": "fixed potential crash parsing broken vtt files",
+  "stat": " 1 file changed, 2 insertions(+), 1 deletion(-)",
+  "applies_to_baseline": true
+ },
+ "42531361": {
+  "patch": "patches/42531361.patch",
+  "mode": "commit-diff",
+  "fix_commit": "170631255f5504243b34323d61edb60b2dfbce51",
+  "files": [
+   "src/media_tools/av_parsers.c"
+  ],
+  "subject": "fixed possible crash in vvc tile parsing of corrupted streams",
+  "stat": " 1 file changed, 7 insertions(+)",
+  "applies_to_baseline": true
+ },
+ "42531371": {
+  "patch": "patches/42531371.patch",
+  "mode": "commit-diff",
+  "fix_commit": "067bef9548698847fe9126308626e672e1ecab75",
+  "files": [
+   "src/utils/token.c"
+  ],
+  "subject": "fixed potential overflow in token read with broken sdp",
+  "stat": " 1 file changed, 4 insertions(+), 4 deletions(-)",
+  "applies_to_baseline": true
+ },
+ "42531432": {
+  "patch": "patches/42531432.patch",
+  "mode": "commit-diff",
+  "fix_commit": "14ecc478ad48b4df8b0892a7f25cae90a714f059",
+  "files": [
+   "src/media_tools/av_parsers.c"
+  ],
+  "subject": "fixed index out of band in hevc ref pics with broken streams",
+  "stat": " 1 file changed, 3 insertions(+), 2 deletions(-)",
+  "applies_to_baseline": true
+ },
+ "42531500": {
+  "patch": "patches/42531500.patch",
+  "mode": "commit-diff",
+  "fix_commit": "c3ce6dd423aa459de3690016833ed740df54f989",
+  "files": [
+   "src/media_tools/av_parsers.c",
+   "src/media_tools/gpac_ogg.c"
+  ],
+  "subject": "fixed bug in vorbis header parsing",
+  "stat": " 2 files changed, 6 insertions(+), 1 deletion(-)",
+  "applies_to_baseline": true
+ },
+ "42531925": {
+  "patch": "patches/42531925.patch",
+  "mode": "commit-diff",
+  "fix_commit": "0ff40625b602590afffb383ab03d155e0ba509ed",
+  "files": [
+   "src/utils/os_net.c"
+  ],
+  "subject": "fixed potential crash in unix domain sockets with broken adresses",
+  "stat": " 1 file changed, 2 insertions(+), 2 deletions(-)",
+  "applies_to_baseline": true
+ },
+ "42532144": {
+  "patch": "patches/42532144.patch",
+  "mode": "commit-diff",
+  "fix_commit": "593d9afa9db74a83909c4c1f1d27c9f4289e96c7",
+  "files": [
+   "src/filters/reframe_mp3.c"
+  ],
+  "subject": "fixed possible crash parsing cover art in broken id3tag",
+  "stat": " 1 file changed, 23 insertions(+), 19 deletions(-)",
+  "applies_to_baseline": true
+ },
+ "42532171": {
+  "patch": "patches/42532171.patch",
+  "mode": "commit-diff",
+  "fix_commit": "25ca355f14a28baeb6afd911ca7ae66deb37a1ac",
+  "files": [
+   "src/filters/reframe_mpgvid.c"
+  ],
+  "subject": "fixed possible memcpy overlap in rfmpegvid",
+  "stat": " 1 file changed, 2 insertions(+), 2 deletions(-)",
+  "applies_to_baseline": true
+ },
+ "42532195": {
+  "patch": "patches/42532195.patch",
+  "mode": "commit-diff",
+  "fix_commit": "52da2ef6b33c26d4ffd72d1d4ae6c42631ea433f",
+  "files": [
+   "src/ietf/rtsp_session.c"
+  ],
+  "subject": "fixed possible stack overflow with broken rtsp urls",
+  "stat": " 1 file changed, 1 insertion(+)",
+  "applies_to_baseline": true
+ },
+ "42532224": {
+  "patch": "patches/42532224.patch",
+  "mode": "commit-diff",
+  "fix_commit": "3e71b0ddc8632b8eea4424a4facb09e47ea353ba",
+  "files": [
+   "src/filters/in_rtp_sdp.c",
+   "src/ietf/sdp.c",
+   "src/utils/token.c"
+  ],
+  "subject": "fixed potential crash in broken sdp parsing",
+  "stat": " 3 files changed, 8 insertions(+), 3 deletions(-)",
+  "applies_to_baseline": true
+ },
+ "42532234": {
+  "patch": "patches/42532234.patch",
+  "mode": "commit-diff",
+  "fix_commit": "964e268f0bf975b881f322ff6d9dd53957fa837d",
+  "files": [
+   "src/media_tools/m3u8.c"
+  ],
+  "subject": "fixed possible heap iverflow with broken m3u8 parsing",
+  "stat": " 1 file changed, 4 insertions(+), 1 deletion(-)",
+  "applies_to_baseline": true
+ },
+ "42532309": {
+  "patch": "patches/42532309.patch",
+  "mode": "commit-diff",
+  "fix_commit": "17d14c6a4f2c3f904a2065a07ef3ae915f78c2df",
+  "files": [
+   "src/filters/reframe_mp3.c"
+  ],
+  "subject": "fixed possible heap overfow in mp3 reframer",
+  "stat": " 1 file changed, 1 insertion(+), 1 deletion(-)",
+  "applies_to_baseline": true
+ },
+ "42532326": {
+  "patch": "patches/42532326.patch",
+  "mode": "commit-diff",
+  "fix_commit": "fe46265eda4375086374ed41a4bb7f3906ced4ca",
+  "files": [
+   "src/filters/dmx_ogg.c"
+  ],
+  "subject": "fixed possible use after free in broken ogg streams",
+  "stat": " 1 file changed, 10 insertions(+), 9 deletions(-)",
+  "applies_to_baseline": true
+ },
+ "42532370": {
+  "patch": "patches/42532370.patch",
+  "mode": "commit-diff",
+  "fix_commit": "a793966c6f4b11ad495d5fbca12f01ae787c767f",
+  "files": [
+   "src/media_tools/av_parsers.c"
+  ],
+  "subject": "fix array overflow on hevc weights",
+  "stat": " 1 file changed, 2 insertions(+), 2 deletions(-)",
+  "applies_to_baseline": true
+ },
+ "42532396": {
+  "patch": "patches/42532396.patch",
+  "mode": "commit-diff",
+  "fix_commit": "a616b4fa0a73ff57eff65fcc6beba6b79260a4fd",
+  "files": [
+   "src/filters/load_text.c"
+  ],
+  "subject": "fix buffer overflow on utf8 conversion",
+  "stat": " 1 file changed, 2 insertions(+), 2 deletions(-)",
+  "applies_to_baseline": true
+ },
+ "42532480": {
+  "patch": "patches/42532480.patch",
+  "mode": "commit-diff",
+  "fix_commit": "523f9e5bb8a7a6e82977f8e7c3cf20ee039edfdd",
+  "files": [
+   "src/filter_core/filter.c"
+  ],
+  "subject": "fix buffer overflow on strcpy",
+  "stat": " 1 file changed, 5 insertions(+), 4 deletions(-)",
+  "applies_to_baseline": true
+ },
+ "42532576": {
+  "patch": "patches/42532576.patch",
+  "mode": "commit-diff",
+  "fix_commit": "58449f859fed66444122465519f03bc3fcc97382",
+  "files": [
+   "src/media_tools/m3u8.c"
+  ],
+  "subject": "fixed possible heap overflow when parsing broken m3u8",
+  "stat": " 1 file changed, 1 insertion(+), 1 deletion(-)",
+  "applies_to_baseline": true
+ },
+ "42532587": {
+  "patch": "patches/42532587.patch",
+  "mode": "commit-diff",
+  "fix_commit": "e95b4f1815c6e70a92953d464eab30c8457a9ad8",
+  "files": [
+   "src/filters/reframe_mpgvid.c"
+  ],
+  "subject": "fix string reading overflow in mpgviddmx",
+  "stat": " 1 file changed, 1 insertion(+), 1 deletion(-)",
+  "applies_to_baseline": true
+ },
+ "42532601": {
+  "patch": "patches/42532601.patch",
+  "mode": "commit-diff",
+  "fix_commit": "ecfe062ed5a110b1577eb1abf2342403b402b227",
+  "files": [
+   "src/ietf/sdp.c"
+  ],
+  "subject": "prevent Index-out-of-bounds in gf_sdp_info_parse",
+  "stat": " 1 file changed, 1 insertion(+), 1 deletion(-)",
+  "applies_to_baseline": true
+ },
+ "42532650": {
+  "patch": "patches/42532650.patch",
+  "mode": "commit-diff",
+  "fix_commit": "00eb62012dbcf7154e5abc4704051e9c604680e9",
+  "files": [
+   "src/ietf/rtsp_session.c"
+  ],
+  "subject": "prevent stack overflow in RTSP_UnpackURL",
+  "stat": " 1 file changed, 3 insertions(+), 3 deletions(-)",
+  "applies_to_baseline": true
+ },
+ "42532685": {
+  "patch": "patches/42532685.patch",
+  "mode": "commit-diff",
+  "fix_commit": "1337ebdfcb28204f39db2b464ed43434dd8623dd",
+  "files": [
+   "src/filters/reframe_img.c"
+  ],
+  "subject": "reframe_img: add int overflow check on image dimensions",
+  "stat": " 1 file changed, 7 insertions(+), 6 deletions(-)",
+  "applies_to_baseline": true
+ },
+ "42532961": {
+  "patch": "patches/42532961.patch",
+  "mode": "commit-diff",
+  "fix_commit": "07c6c799e741a3a7466fc80964703e6f604f38e4",
+  "files": [
+   "src/media_tools/av_parsers.c"
+  ],
+  "subject": "check data size in opus parse header",
+  "stat": " 1 file changed, 2 insertions(+), 2 deletions(-)",
+  "applies_to_baseline": true
+ },
+ "42533061": {
+  "patch": "patches/42533061.patch",
+  "mode": "commit-diff",
+  "fix_commit": "08d2d3128f17bd83d534efd708bdaf1248005e9e",
+  "files": [
+   "src/media_tools/mpegts.c"
+  ],
+  "subject": "m2ts prevent string overflow",
+  "stat": " 1 file changed, 5 insertions(+), 3 deletions(-)",
+  "applies_to_baseline": true
+ },
+ "42533223": {
+  "patch": "patches/42533223.patch",
+  "mode": "commit-diff",
+  "fix_commit": "5a83f50fe9a6cd513029e37cc723ae53c01807c3",
+  "files": [
+   "src/filters/inspect.c"
+  ],
+  "subject": "inspect: check size against nalu_size_length",
+  "stat": " 1 file changed, 4 insertions(+)",
+  "applies_to_baseline": true
+ },
+ "42533348": {
+  "patch": "patches/42533348.patch",
+  "mode": "commit-diff",
+  "fix_commit": "ff627002687235bc6c585fc7ce24137cc6eeb73b",
+  "files": [
+   "src/utils/base_encoding.c"
+  ],
+  "subject": "gz_uncompress: add size check",
+  "stat": " 1 file changed, 1 insertion(+), 1 deletion(-)",
+  "applies_to_baseline": true
+ }
+}

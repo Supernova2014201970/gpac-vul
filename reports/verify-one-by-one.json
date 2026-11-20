@@ -1,0 +1,204 @@
+{
+ "cases": [
+  {
+   "case": 42531304,
+   "patch": "patches/42531304.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42531317,
+   "patch": "patches/42531317.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42531339,
+   "patch": "patches/42531339.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42531361,
+   "patch": "patches/42531361.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42531371,
+   "patch": "patches/42531371.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42531432,
+   "patch": "patches/42531432.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42531500,
+   "patch": "patches/42531500.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42531925,
+   "patch": "patches/42531925.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42532144,
+   "patch": "patches/42532144.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42532171,
+   "patch": "patches/42532171.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42532195,
+   "patch": "patches/42532195.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42532224,
+   "patch": "patches/42532224.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42532234,
+   "patch": "patches/42532234.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42532309,
+   "patch": "patches/42532309.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42532326,
+   "patch": "patches/42532326.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42532370,
+   "patch": "patches/42532370.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42532396,
+   "patch": "patches/42532396.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42532480,
+   "patch": "patches/42532480.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42532576,
+   "patch": "patches/42532576.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42532587,
+   "patch": "patches/42532587.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42532601,
+   "patch": "patches/42532601.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42532650,
+   "patch": "patches/42532650.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42532685,
+   "patch": "patches/42532685.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42532961,
+   "patch": "patches/42532961.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42533061,
+   "patch": "patches/42533061.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42533223,
+   "patch": "patches/42533223.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  },
+  {
+   "case": 42533348,
+   "patch": "patches/42533348.patch",
+   "baseline": "CRASH",
+   "patched": "CLEAN",
+   "pass": true
+  }
+ ],
+ "pass": 27,
+ "fail": 0,
+ "dropped": [
+  42532226,
+  42532406,
+  42532845,
+  42533013,
+  42533592,
+  42533693
+ ],
+ "dropped_reason": "two-sided check did not hold: patch applied but the PoC kept crashing, so the recorded fix_commit does not cover it"
+}

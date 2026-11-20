@@ -1,0 +1,30 @@
+# localId	target	sanitizer	expect	poc	patch	fix_commit	subject
+# One row per ARVO case; every column is checked by verify.sh /
+# verify-one-by-one.sh.  expect=CRASH on the delivered tree.
+42531304	fuzz_probe_analyze	asan	CRASH	pocs/42531304/poc	patches/42531304.patch	538b229cab5e	fixed potential crash in ghi demux init
+42531317	fuzz_probe_analyze	asan	CRASH	pocs/42531317/poc	patches/42531317.patch	8a6e53e52313	fixed possible mem overread
+42531339	fuzz_probe_analyze	asan	CRASH	pocs/42531339/poc	patches/42531339.patch	4786c169258f	fixed potential crash parsing broken vtt files
+42531361	fuzz_probe_analyze	ubsan	CRASH	pocs/42531361/poc	patches/42531361.patch	170631255f55	fixed possible crash in vvc tile parsing of corrupted streams
+42531371	fuzz_probe_analyze	asan	CRASH	pocs/42531371/poc	patches/42531371.patch	067bef954869	fixed potential overflow in token read with broken sdp
+42531432	fuzz_probe_analyze	ubsan	CRASH	pocs/42531432/poc	patches/42531432.patch	14ecc478ad48	fixed index out of band in hevc ref pics with broken streams
+42531500	fuzz_probe_analyze	ubsan	CRASH	pocs/42531500/poc	patches/42531500.patch	c3ce6dd423aa	fixed bug in vorbis header parsing
+42531925	fuzz_probe_analyze	asan	CRASH	pocs/42531925/poc	patches/42531925.patch	0ff40625b602	fixed potential crash in unix domain sockets with broken adresses
+42532144	fuzz_probe_analyze	asan	CRASH	pocs/42532144/poc	patches/42532144.patch	593d9afa9db7	fixed possible crash parsing cover art in broken id3tag
+42532171	fuzz_probe_analyze	asan	CRASH	pocs/42532171/poc	patches/42532171.patch	25ca355f14a2	fixed possible memcpy overlap in rfmpegvid
+42532195	fuzz_probe_analyze	asan	CRASH	pocs/42532195/poc	patches/42532195.patch	52da2ef6b33c	fixed possible stack overflow with broken rtsp urls
+42532224	fuzz_probe_analyze	ubsan	CRASH	pocs/42532224/poc	patches/42532224.patch	3e71b0ddc863	fixed potential crash in broken sdp parsing
+42532234	fuzz_probe_analyze	asan	CRASH	pocs/42532234/poc	patches/42532234.patch	964e268f0bf9	fixed possible heap iverflow with broken m3u8 parsing
+42532309	fuzz_probe_analyze	asan	CRASH	pocs/42532309/poc	patches/42532309.patch	17d14c6a4f2c	fixed possible heap overfow in mp3 reframer
+42532326	fuzz_probe_analyze	asan	CRASH	pocs/42532326/poc	patches/42532326.patch	fe46265eda43	fixed possible use after free in broken ogg streams
+42532370	fuzz_probe_analyze	ubsan	CRASH	pocs/42532370/poc	patches/42532370.patch	a793966c6f4b	fix array overflow on hevc weights
+42532396	fuzz_probe_analyze	asan	CRASH	pocs/42532396/poc	patches/42532396.patch	a616b4fa0a73	fix buffer overflow on utf8 conversion
+42532480	fuzz_probe_analyze	asan	CRASH	pocs/42532480/poc	patches/42532480.patch	523f9e5bb8a7	fix buffer overflow on strcpy
+42532576	fuzz_probe_analyze	asan	CRASH	pocs/42532576/poc	patches/42532576.patch	58449f859fed	fixed possible heap overflow when parsing broken m3u8
+42532587	fuzz_probe_analyze	asan	CRASH	pocs/42532587/poc	patches/42532587.patch	e95b4f1815c6	fix string reading overflow in mpgviddmx
+42532601	fuzz_probe_analyze	ubsan	CRASH	pocs/42532601/poc	patches/42532601.patch	ecfe062ed5a1	prevent Index-out-of-bounds in gf_sdp_info_parse
+42532650	fuzz_probe_analyze	asan	CRASH	pocs/42532650/poc	patches/42532650.patch	00eb62012dbc	prevent stack overflow in RTSP_UnpackURL
+42532685	fuzz_probe_analyze	asan	CRASH	pocs/42532685/poc	patches/42532685.patch	1337ebdfcb28	reframe_img: add int overflow check on image dimensions
+42532961	fuzz_probe_analyze	asan	CRASH	pocs/42532961/poc	patches/42532961.patch	07c6c799e741	check data size in opus parse header
+42533061	fuzz_probe_analyze	asan	CRASH	pocs/42533061/poc	patches/42533061.patch	08d2d3128f17	m2ts prevent string overflow
+42533223	fuzz_probe_analyze	asan	CRASH	pocs/42533223/poc	patches/42533223.patch	5a83f50fe9a6	inspect: check size against nalu_size_length
+42533348	fuzz_parse	asan	CRASH	pocs/42533348/poc	patches/42533348.patch	ff6270026872	gz_uncompress: add size check

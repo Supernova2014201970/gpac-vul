@@ -1,0 +1,1634 @@
+{
+ "project": "gpac",
+ "baseline": "b890f1c443dbe1f941cd326d4473ce7ddef8e256",
+ "pocs": 27,
+ "vulnerabilities": [
+  {
+   "id": 42531304,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "Heap-buffer-overflow READ {*}",
+   "severity": "Medium",
+   "cwe": "CWE-125",
+   "location": {
+    "file": "src/utils/xml_parser.c",
+    "line": 977,
+    "function": "xml_sax_append_string",
+    "stack": [
+     {
+      "function": "xml_sax_append_string",
+      "file": "src/utils/xml_parser.c"
+     },
+     {
+      "function": "gf_xml_sax_parse_intern",
+      "file": "src/utils/xml_parser.c"
+     },
+     {
+      "function": "gf_xml_sax_parse",
+      "file": "src/utils/xml_parser.c"
+     },
+     {
+      "function": "gf_xml_dom_parse_string",
+      "file": "src/utils/xml_parser.c"
+     },
+     {
+      "function": "ghi_dmx_init_xml",
+      "file": "src/filters/dmx_ghi.c"
+     },
+     {
+      "function": "ghi_dmx_init",
+      "file": "src/filters/dmx_ghi.c"
+     },
+     {
+      "function": "ghi_dmx_process",
+      "file": "src/filters/dmx_ghi.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     }
+    ]
+   },
+   "fix_commit": "538b229cab5e6317053c15c66417a9d053681ad0",
+   "fix_subject": "fixed potential crash in ghi demux init",
+   "patch": "patches/42531304.patch",
+   "files_touched": [
+    "src/filters/dmx_ghi.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42531304"
+  },
+  {
+   "id": 42531317,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "severity": "Medium",
+   "cwe": "CWE-125",
+   "location": {
+    "file": "src/utils/url.c",
+    "line": 432,
+    "function": "gf_url_to_fs_path",
+    "stack": [
+     {
+      "function": "gf_url_to_fs_path",
+      "file": "src/utils/url.c"
+     },
+     {
+      "function": "gf_fs_load_source_dest_internal",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_filter_connect_source",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "filelist_load_next",
+      "file": "src/filters/filelist.c"
+     },
+     {
+      "function": "filelist_process",
+      "file": "src/filters/filelist.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_strdup",
+      "file": "src/utils/alloc.c"
+     },
+     {
+      "function": "gf_url_concatenate_ex",
+      "file": "src/utils/url.c"
+     }
+    ]
+   },
+   "fix_commit": "8a6e53e5231354b52feaffc02eae48204303157d",
+   "fix_subject": "fixed possible mem overread",
+   "patch": "patches/42531317.patch",
+   "files_touched": [
+    "src/utils/url.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42531317"
+  },
+  {
+   "id": 42531339,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "Stack-buffer-overflow READ {*}",
+   "severity": "Medium",
+   "cwe": "CWE-125",
+   "location": {
+    "file": "src/utils/alloc.c",
+    "line": 170,
+    "function": "gf_strdup",
+    "stack": [
+     {
+      "function": "gf_strdup",
+      "file": "src/utils/alloc.c"
+     },
+     {
+      "function": "gf_webvtt_parser_parse_internal",
+      "file": "src/media_tools/webvtt.c"
+     },
+     {
+      "function": "gf_webvtt_parser_parse",
+      "file": "src/media_tools/webvtt.c"
+     },
+     {
+      "function": "txtin_process_webvtt",
+      "file": "src/filters/load_text.c"
+     },
+     {
+      "function": "txtin_process",
+      "file": "src/filters/load_text.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_webvtt_parser_parse_internal",
+      "file": "src/media_tools/webvtt.c"
+     }
+    ]
+   },
+   "fix_commit": "4786c169258fcf4adfeafe03e09c1f214c0d09cf",
+   "fix_subject": "fixed potential crash parsing broken vtt files",
+   "patch": "patches/42531339.patch",
+   "files_touched": [
+    "src/media_tools/webvtt.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42531339"
+  },
+  {
+   "id": 42531361,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "ubsan",
+   "crash_type": "Index-out-of-bounds",
+   "severity": "Medium",
+   "cwe": "CWE-129",
+   "location": {
+    "file": "src/media_tools/av_parsers.c",
+    "line": 11638,
+    "function": "vvc_get_ctb_info_in_slice",
+    "stack": [
+     {
+      "function": "vvc_get_ctb_info_in_slice",
+      "file": "src/media_tools/av_parsers.c"
+     },
+     {
+      "function": "vvc_get_num_entry_points",
+      "file": "src/media_tools/av_parsers.c"
+     },
+     {
+      "function": "vvc_parse_slice",
+      "file": "src/media_tools/av_parsers.c"
+     },
+     {
+      "function": "gf_vvc_parse_nalu_bs",
+      "file": "src/media_tools/av_parsers.c"
+     },
+     {
+      "function": "gf_inspect_dump_nalu_internal",
+      "file": "src/filters/inspect.c"
+     },
+     {
+      "function": "inspect_dump_packet",
+      "file": "src/filters/inspect.c"
+     },
+     {
+      "function": "inspect_process",
+      "file": "src/filters/inspect.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     }
+    ]
+   },
+   "fix_commit": "170631255f5504243b34323d61edb60b2dfbce51",
+   "fix_subject": "fixed possible crash in vvc tile parsing of corrupted streams",
+   "patch": "patches/42531361.patch",
+   "files_touched": [
+    "src/media_tools/av_parsers.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42531361"
+  },
+  {
+   "id": 42531371,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "Stack-buffer-overflow WRITE 1",
+   "severity": "High",
+   "cwe": "CWE-121",
+   "location": {
+    "file": "src/utils/token.c",
+    "line": 105,
+    "function": "gf_token_get_line",
+    "stack": [
+     {
+      "function": "gf_token_get_line",
+      "file": "src/utils/token.c"
+     },
+     {
+      "function": "gf_sdp_info_parse",
+      "file": "src/ietf/sdp.c"
+     },
+     {
+      "function": "rtpin_load_sdp",
+      "file": "src/filters/in_rtp_sdp.c"
+     },
+     {
+      "function": "rtpin_process",
+      "file": "src/filters/in_rtp.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_sdp_info_parse",
+      "file": "src/ietf/sdp.c"
+     }
+    ]
+   },
+   "fix_commit": "067bef9548698847fe9126308626e672e1ecab75",
+   "fix_subject": "fixed potential overflow in token read with broken sdp",
+   "patch": "patches/42531371.patch",
+   "files_touched": [
+    "src/utils/token.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42531371"
+  },
+  {
+   "id": 42531432,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "ubsan",
+   "crash_type": "Index-out-of-bounds",
+   "severity": "Medium",
+   "cwe": "CWE-129",
+   "location": {
+    "file": "src/media_tools/av_parsers.c",
+    "line": 7086,
+    "function": "hevc_parse_short_term_ref_pic_set",
+    "stack": [
+     {
+      "function": "hevc_parse_short_term_ref_pic_set",
+      "file": "src/media_tools/av_parsers.c"
+     },
+     {
+      "function": "gf_hevc_read_sps_bs_internal",
+      "file": "src/media_tools/av_parsers.c"
+     },
+     {
+      "function": "gf_hevc_parse_nalu_bs",
+      "file": "src/media_tools/av_parsers.c"
+     },
+     {
+      "function": "naludmx_check_dur",
+      "file": "src/filters/reframe_nalu.c"
+     },
+     {
+      "function": "naludmx_check_pid",
+      "file": "src/filters/reframe_nalu.c"
+     },
+     {
+      "function": "naludmx_process",
+      "file": "src/filters/reframe_nalu.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     }
+    ]
+   },
+   "fix_commit": "14ecc478ad48b4df8b0892a7f25cae90a714f059",
+   "fix_subject": "fixed index out of band in hevc ref pics with broken streams",
+   "patch": "patches/42531432.patch",
+   "files_touched": [
+    "src/media_tools/av_parsers.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42531432"
+  },
+  {
+   "id": 42531500,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "ubsan",
+   "crash_type": "Index-out-of-bounds",
+   "severity": "Medium",
+   "cwe": "CWE-129",
+   "location": {
+    "file": "src/media_tools/gpac_ogg.c",
+    "line": 366,
+    "function": "oggpack_read",
+    "stack": [
+     {
+      "function": "oggpack_read",
+      "file": "src/media_tools/gpac_ogg.c"
+     },
+     {
+      "function": "gf_vorbis_parse_header",
+      "file": "src/media_tools/av_parsers.c"
+     },
+     {
+      "function": "oggdmx_check_dur",
+      "file": "src/filters/dmx_ogg.c"
+     },
+     {
+      "function": "oggdmx_process",
+      "file": "src/filters/dmx_ogg.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     }
+    ]
+   },
+   "fix_commit": "c3ce6dd423aa459de3690016833ed740df54f989",
+   "fix_subject": "fixed bug in vorbis header parsing",
+   "patch": "patches/42531500.patch",
+   "files_touched": [
+    "src/media_tools/av_parsers.c",
+    "src/media_tools/gpac_ogg.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42531500"
+  },
+  {
+   "id": 42531925,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "Stack-buffer-overflow WRITE {*}",
+   "severity": "High",
+   "cwe": "CWE-121",
+   "location": {
+    "file": "src/utils/os_net.c",
+    "line": 1766,
+    "function": "gf_sk_connect",
+    "stack": [
+     {
+      "function": "gf_sk_connect",
+      "file": "src/utils/os_net.c"
+     },
+     {
+      "function": "gf_filter_new_finalize",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_filter_new",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_load_source_dest_internal",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_filter_connect_source",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "filelist_load_next",
+      "file": "src/filters/filelist.c"
+     },
+     {
+      "function": "filelist_process",
+      "file": "src/filters/filelist.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     }
+    ]
+   },
+   "fix_commit": "0ff40625b602590afffb383ab03d155e0ba509ed",
+   "fix_subject": "fixed potential crash in unix domain sockets with broken adresses",
+   "patch": "patches/42531925.patch",
+   "files_touched": [
+    "src/utils/os_net.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42531925"
+  },
+  {
+   "id": 42532144,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "Heap-buffer-overflow READ {*}",
+   "severity": "Medium",
+   "cwe": "CWE-125",
+   "location": {
+    "file": "src/filter_core/filter_props.c",
+    "line": 1017,
+    "function": "gf_props_assign_value",
+    "stack": [
+     {
+      "function": "gf_props_assign_value",
+      "file": "src/filter_core/filter_props.c"
+     },
+     {
+      "function": "gf_props_insert_property",
+      "file": "src/filter_core/filter_props.c"
+     },
+     {
+      "function": "gf_props_set_property",
+      "file": "src/filter_core/filter_props.c"
+     },
+     {
+      "function": "gf_filter_pid_set_property_full",
+      "file": "src/filter_core/filter_pid.c"
+     },
+     {
+      "function": "gf_filter_pid_set_property",
+      "file": "src/filter_core/filter_pid.c"
+     },
+     {
+      "function": "id3dmx_flush",
+      "file": "src/filters/reframe_mp3.c"
+     },
+     {
+      "function": "adts_dmx_check_pid",
+      "file": "src/filters/reframe_adts.c"
+     },
+     {
+      "function": "adts_dmx_process",
+      "file": "src/filters/reframe_adts.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     }
+    ]
+   },
+   "fix_commit": "593d9afa9db74a83909c4c1f1d27c9f4289e96c7",
+   "fix_subject": "fixed possible crash parsing cover art in broken id3tag",
+   "patch": "patches/42532144.patch",
+   "files_touched": [
+    "src/filters/reframe_mp3.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42532144"
+  },
+  {
+   "id": 42532171,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "Memcpy-param-overlap",
+   "severity": "Medium",
+   "cwe": null,
+   "location": {
+    "file": "src/filters/reframe_mpgvid.c",
+    "line": 739,
+    "function": "mpgviddmx_process",
+    "stack": [
+     {
+      "function": "mpgviddmx_process",
+      "file": "src/filters/reframe_mpgvid.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_realloc",
+      "file": "src/utils/alloc.c"
+     },
+     {
+      "function": "mpgviddmx_process",
+      "file": "src/filters/reframe_mpgvid.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_realloc",
+      "file": "src/utils/alloc.c"
+     }
+    ]
+   },
+   "fix_commit": "25ca355f14a28baeb6afd911ca7ae66deb37a1ac",
+   "fix_subject": "fixed possible memcpy overlap in rfmpegvid",
+   "patch": "patches/42532171.patch",
+   "files_touched": [
+    "src/filters/reframe_mpgvid.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42532171"
+  },
+  {
+   "id": 42532195,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "Stack-buffer-overflow WRITE 1",
+   "severity": "High",
+   "cwe": "CWE-121",
+   "location": {
+    "file": "src/ietf/rtsp_session.c",
+    "line": 76,
+    "function": "RTSP_UnpackURL",
+    "stack": [
+     {
+      "function": "RTSP_UnpackURL",
+      "file": "src/ietf/rtsp_session.c"
+     },
+     {
+      "function": "gf_rtsp_session_new",
+      "file": "src/ietf/rtsp_session.c"
+     },
+     {
+      "function": "rtpin_rtsp_new",
+      "file": "src/filters/in_rtp_rtsp.c"
+     },
+     {
+      "function": "rtpin_initialize",
+      "file": "src/filters/in_rtp.c"
+     },
+     {
+      "function": "gf_filter_new_finalize",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_filter_new",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_load_source_dest_internal",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_filter_connect_source",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "filelist_load_next",
+      "file": "src/filters/filelist.c"
+     },
+     {
+      "function": "filelist_process",
+      "file": "src/filters/filelist.c"
+     }
+    ]
+   },
+   "fix_commit": "52da2ef6b33c26d4ffd72d1d4ae6c42631ea433f",
+   "fix_subject": "fixed possible stack overflow with broken rtsp urls",
+   "patch": "patches/42532195.patch",
+   "files_touched": [
+    "src/ietf/rtsp_session.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42532195"
+  },
+  {
+   "id": 42532224,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "ubsan",
+   "crash_type": "Index-out-of-bounds",
+   "severity": "Medium",
+   "cwe": "CWE-129",
+   "location": {
+    "file": "src/ietf/sdp.c",
+    "line": 613,
+    "function": "gf_sdp_info_parse",
+    "stack": [
+     {
+      "function": "gf_sdp_info_parse",
+      "file": "src/ietf/sdp.c"
+     },
+     {
+      "function": "rtpin_load_sdp",
+      "file": "src/filters/in_rtp_sdp.c"
+     },
+     {
+      "function": "rtpin_process",
+      "file": "src/filters/in_rtp.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     }
+    ]
+   },
+   "fix_commit": "3e71b0ddc8632b8eea4424a4facb09e47ea353ba",
+   "fix_subject": "fixed potential crash in broken sdp parsing",
+   "patch": "patches/42532224.patch",
+   "files_touched": [
+    "src/filters/in_rtp_sdp.c",
+    "src/ietf/sdp.c",
+    "src/utils/token.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42532224"
+  },
+  {
+   "id": 42532234,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "Heap-buffer-overflow READ 8",
+   "severity": "Medium",
+   "cwe": "CWE-125",
+   "location": {
+    "file": "src/media_tools/m3u8.c",
+    "line": 1257,
+    "function": "gf_m3u8_parse_sub_playlist",
+    "stack": [
+     {
+      "function": "gf_m3u8_parse_sub_playlist",
+      "file": "src/media_tools/m3u8.c"
+     },
+     {
+      "function": "gf_m3u8_parse_master_playlist",
+      "file": "src/media_tools/m3u8.c"
+     },
+     {
+      "function": "gf_m3u8_to_mpd",
+      "file": "src/media_tools/mpd.c"
+     },
+     {
+      "function": "dashdmx_configure_pid",
+      "file": "src/filters/dmx_dash.c"
+     },
+     {
+      "function": "gf_filter_pid_configure",
+      "file": "src/filter_core/filter_pid.c"
+     },
+     {
+      "function": "gf_filter_pid_connect_task",
+      "file": "src/filter_core/filter_pid.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_calloc",
+      "file": "src/utils/alloc.c"
+     },
+     {
+      "function": "extract_attributes",
+      "file": "src/media_tools/m3u8.c"
+     }
+    ]
+   },
+   "fix_commit": "964e268f0bf975b881f322ff6d9dd53957fa837d",
+   "fix_subject": "fixed possible heap iverflow with broken m3u8 parsing",
+   "patch": "patches/42532234.patch",
+   "files_touched": [
+    "src/media_tools/m3u8.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42532234"
+  },
+  {
+   "id": 42532309,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "severity": "Medium",
+   "cwe": "CWE-125",
+   "location": {
+    "file": "src/filters/reframe_mp3.c",
+    "line": 645,
+    "function": "mp3_dmx_process",
+    "stack": [
+     {
+      "function": "mp3_dmx_process",
+      "file": "src/filters/reframe_mp3.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_realloc",
+      "file": "src/utils/alloc.c"
+     },
+     {
+      "function": "mp3_dmx_process",
+      "file": "src/filters/reframe_mp3.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     }
+    ]
+   },
+   "fix_commit": "17d14c6a4f2c3f904a2065a07ef3ae915f78c2df",
+   "fix_subject": "fixed possible heap overfow in mp3 reframer",
+   "patch": "patches/42532309.patch",
+   "files_touched": [
+    "src/filters/reframe_mp3.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42532309"
+  },
+  {
+   "id": 42532326,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "Heap-use-after-free READ 1",
+   "severity": "High",
+   "cwe": "CWE-416",
+   "location": {
+    "file": "src/filters/dmx_ogg.c",
+    "line": 132,
+    "function": "oggdmx_get_stream_info",
+    "stack": [
+     {
+      "function": "oggdmx_get_stream_info",
+      "file": "src/filters/dmx_ogg.c"
+     },
+     {
+      "function": "oggdmx_check_dur",
+      "file": "src/filters/dmx_ogg.c"
+     },
+     {
+      "function": "oggdmx_process",
+      "file": "src/filters/dmx_ogg.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_free",
+      "file": "src/utils/alloc.c"
+     },
+     {
+      "function": "ogg_stream_clear",
+      "file": "src/media_tools/gpac_ogg.c"
+     },
+     {
+      "function": "oggdmx_check_dur",
+      "file": "src/filters/dmx_ogg.c"
+     },
+     {
+      "function": "oggdmx_process",
+      "file": "src/filters/dmx_ogg.c"
+     }
+    ]
+   },
+   "fix_commit": "fe46265eda4375086374ed41a4bb7f3906ced4ca",
+   "fix_subject": "fixed possible use after free in broken ogg streams",
+   "patch": "patches/42532326.patch",
+   "files_touched": [
+    "src/filters/dmx_ogg.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42532326"
+  },
+  {
+   "id": 42532370,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "ubsan",
+   "crash_type": "Index-out-of-bounds",
+   "severity": "Medium",
+   "cwe": "CWE-129",
+   "location": {
+    "file": "src/media_tools/av_parsers.c",
+    "line": 7140,
+    "function": "hevc_pred_weight_table",
+    "stack": [
+     {
+      "function": "hevc_pred_weight_table",
+      "file": "src/media_tools/av_parsers.c"
+     },
+     {
+      "function": "hevc_parse_slice_segment",
+      "file": "src/media_tools/av_parsers.c"
+     },
+     {
+      "function": "gf_hevc_parse_nalu_bs",
+      "file": "src/media_tools/av_parsers.c"
+     },
+     {
+      "function": "gf_inspect_dump_nalu_internal",
+      "file": "src/filters/inspect.c"
+     },
+     {
+      "function": "inspect_dump_packet",
+      "file": "src/filters/inspect.c"
+     },
+     {
+      "function": "inspect_process",
+      "file": "src/filters/inspect.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     }
+    ]
+   },
+   "fix_commit": "a793966c6f4b11ad495d5fbca12f01ae787c767f",
+   "fix_subject": "fix array overflow on hevc weights",
+   "patch": "patches/42532370.patch",
+   "files_touched": [
+    "src/media_tools/av_parsers.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42532370"
+  },
+  {
+   "id": 42532396,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "Stack-buffer-overflow READ 1",
+   "severity": "Medium",
+   "cwe": "CWE-125",
+   "location": {
+    "file": "src/filters/load_text.c",
+    "line": 371,
+    "function": "gf_text_get_utf8_line",
+    "stack": [
+     {
+      "function": "gf_text_get_utf8_line",
+      "file": "src/filters/load_text.c"
+     },
+     {
+      "function": "txtin_probe_duration",
+      "file": "src/filters/load_text.c"
+     },
+     {
+      "function": "txtin_setup_srt",
+      "file": "src/filters/load_text.c"
+     },
+     {
+      "function": "txtin_process_srt",
+      "file": "src/filters/load_text.c"
+     },
+     {
+      "function": "txtin_process",
+      "file": "src/filters/load_text.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "txtin_probe_duration",
+      "file": "src/filters/load_text.c"
+     }
+    ]
+   },
+   "fix_commit": "a616b4fa0a73ff57eff65fcc6beba6b79260a4fd",
+   "fix_subject": "fix buffer overflow on utf8 conversion",
+   "patch": "patches/42532396.patch",
+   "files_touched": [
+    "src/filters/load_text.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42532396"
+  },
+  {
+   "id": 42532480,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "Stack-buffer-overflow WRITE {*}",
+   "severity": "High",
+   "cwe": "CWE-121",
+   "location": {
+    "file": "src/filter_core/filter.c",
+    "line": 1048,
+    "function": "filter_solve_prop_template",
+    "stack": [
+     {
+      "function": "filter_solve_prop_template",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_filter_parse_prop_solve_env_var",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "filter_parse_dyn_args",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_filter_parse_args",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_filter_new_finalize",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_filter_new",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_load_source_dest_internal",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_filter_connect_source",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "filelist_load_next",
+      "file": "src/filters/filelist.c"
+     },
+     {
+      "function": "filelist_process",
+      "file": "src/filters/filelist.c"
+     }
+    ]
+   },
+   "fix_commit": "523f9e5bb8a7a6e82977f8e7c3cf20ee039edfdd",
+   "fix_subject": "fix buffer overflow on strcpy",
+   "patch": "patches/42532480.patch",
+   "files_touched": [
+    "src/filter_core/filter.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42532480"
+  },
+  {
+   "id": 42532576,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "severity": "Medium",
+   "cwe": "CWE-125",
+   "location": {
+    "file": "src/utils/alloc.c",
+    "line": 170,
+    "function": "gf_strdup",
+    "stack": [
+     {
+      "function": "gf_strdup",
+      "file": "src/utils/alloc.c"
+     },
+     {
+      "function": "parse_attributes",
+      "file": "src/media_tools/m3u8.c"
+     },
+     {
+      "function": "gf_m3u8_parse_sub_playlist",
+      "file": "src/media_tools/m3u8.c"
+     },
+     {
+      "function": "gf_m3u8_parse_master_playlist",
+      "file": "src/media_tools/m3u8.c"
+     },
+     {
+      "function": "gf_m3u8_to_mpd",
+      "file": "src/media_tools/mpd.c"
+     },
+     {
+      "function": "gf_dash_open",
+      "file": "src/media_tools/dash_client.c"
+     },
+     {
+      "function": "dashdmx_configure_pid",
+      "file": "src/filters/dmx_dash.c"
+     },
+     {
+      "function": "gf_filter_pid_configure",
+      "file": "src/filter_core/filter_pid.c"
+     },
+     {
+      "function": "gf_filter_pid_connect_task",
+      "file": "src/filter_core/filter_pid.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     }
+    ]
+   },
+   "fix_commit": "58449f859fed66444122465519f03bc3fcc97382",
+   "fix_subject": "fixed possible heap overflow when parsing broken m3u8",
+   "patch": "patches/42532576.patch",
+   "files_touched": [
+    "src/media_tools/m3u8.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42532576"
+  },
+  {
+   "id": 42532587,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "Heap-buffer-overflow READ 2",
+   "severity": "Medium",
+   "cwe": "CWE-125",
+   "location": {
+    "file": "src/filters/reframe_mpgvid.c",
+    "line": 428,
+    "function": "mpgviddmx_check_pid",
+    "stack": [
+     {
+      "function": "mpgviddmx_check_pid",
+      "file": "src/filters/reframe_mpgvid.c"
+     },
+     {
+      "function": "mpgviddmx_process",
+      "file": "src/filters/reframe_mpgvid.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_malloc",
+      "file": "src/utils/alloc.c"
+     },
+     {
+      "function": "mpgviddmx_check_pid",
+      "file": "src/filters/reframe_mpgvid.c"
+     },
+     {
+      "function": "mpgviddmx_process",
+      "file": "src/filters/reframe_mpgvid.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     }
+    ]
+   },
+   "fix_commit": "e95b4f1815c6e70a92953d464eab30c8457a9ad8",
+   "fix_subject": "fix string reading overflow in mpgviddmx",
+   "patch": "patches/42532587.patch",
+   "files_touched": [
+    "src/filters/reframe_mpgvid.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42532587"
+  },
+  {
+   "id": 42532601,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "ubsan",
+   "crash_type": "Index-out-of-bounds",
+   "severity": "Medium",
+   "cwe": "CWE-129",
+   "location": {
+    "file": "src/ietf/sdp.c",
+    "line": 625,
+    "function": "gf_sdp_info_parse",
+    "stack": [
+     {
+      "function": "gf_sdp_info_parse",
+      "file": "src/ietf/sdp.c"
+     },
+     {
+      "function": "rtpin_load_sdp",
+      "file": "src/filters/in_rtp_sdp.c"
+     },
+     {
+      "function": "rtpin_process",
+      "file": "src/filters/in_rtp.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     }
+    ]
+   },
+   "fix_commit": "ecfe062ed5a110b1577eb1abf2342403b402b227",
+   "fix_subject": "prevent Index-out-of-bounds in gf_sdp_info_parse",
+   "patch": "patches/42532601.patch",
+   "files_touched": [
+    "src/ietf/sdp.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42532601"
+  },
+  {
+   "id": 42532650,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "Stack-buffer-overflow WRITE 1",
+   "severity": "High",
+   "cwe": "CWE-121",
+   "location": {
+    "file": "src/ietf/rtsp_session.c",
+    "line": 120,
+    "function": "RTSP_UnpackURL",
+    "stack": [
+     {
+      "function": "RTSP_UnpackURL",
+      "file": "src/ietf/rtsp_session.c"
+     },
+     {
+      "function": "gf_rtsp_session_new",
+      "file": "src/ietf/rtsp_session.c"
+     },
+     {
+      "function": "rtpin_rtsp_new",
+      "file": "src/filters/in_rtp_rtsp.c"
+     },
+     {
+      "function": "rtpin_initialize",
+      "file": "src/filters/in_rtp.c"
+     },
+     {
+      "function": "gf_filter_new_finalize",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_filter_new",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_load_source_dest_internal",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_filter_connect_source",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "filelist_load_next",
+      "file": "src/filters/filelist.c"
+     },
+     {
+      "function": "filelist_process",
+      "file": "src/filters/filelist.c"
+     }
+    ]
+   },
+   "fix_commit": "00eb62012dbcf7154e5abc4704051e9c604680e9",
+   "fix_subject": "prevent stack overflow in RTSP_UnpackURL",
+   "patch": "patches/42532650.patch",
+   "files_touched": [
+    "src/ietf/rtsp_session.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42532650"
+  },
+  {
+   "id": 42532685,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "UNKNOWN WRITE",
+   "severity": "High",
+   "cwe": "CWE-787",
+   "location": {
+    "file": "src/filter_core/filter.c",
+    "line": 2971,
+    "function": "gf_filter_process_task",
+    "stack": [
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     }
+    ]
+   },
+   "fix_commit": "1337ebdfcb28204f39db2b464ed43434dd8623dd",
+   "fix_subject": "reframe_img: add int overflow check on image dimensions",
+   "patch": "patches/42532685.patch",
+   "files_touched": [
+    "src/filters/reframe_img.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42532685"
+  },
+  {
+   "id": 42532961,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "Heap-buffer-overflow READ 8",
+   "severity": "Medium",
+   "cwe": "CWE-125",
+   "location": {
+    "file": "src/media_tools/av_parsers.c",
+    "line": 9884,
+    "function": "gf_opus_parse_packet_header",
+    "stack": [
+     {
+      "function": "gf_opus_parse_packet_header",
+      "file": "src/media_tools/av_parsers.c"
+     },
+     {
+      "function": "gf_inspect_dump_opus_internal",
+      "file": "src/filters/inspect.c"
+     },
+     {
+      "function": "inspect_dump_packet",
+      "file": "src/filters/inspect.c"
+     },
+     {
+      "function": "inspect_process",
+      "file": "src/filters/inspect.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_malloc",
+      "file": "src/utils/alloc.c"
+     },
+     {
+      "function": "gf_filter_pck_new_alloc_internal",
+      "file": "src/filter_core/filter_pck.c"
+     },
+     {
+      "function": "gf_filter_pck_new_alloc",
+      "file": "src/filter_core/filter_pck.c"
+     }
+    ]
+   },
+   "fix_commit": "07c6c799e741a3a7466fc80964703e6f604f38e4",
+   "fix_subject": "check data size in opus parse header",
+   "patch": "patches/42532961.patch",
+   "files_touched": [
+    "src/media_tools/av_parsers.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42532961"
+  },
+  {
+   "id": 42533061,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "Stack-buffer-overflow WRITE 1",
+   "severity": "High",
+   "cwe": "CWE-121",
+   "location": {
+    "file": "src/media_tools/mpegts.c",
+    "line": 2475,
+    "function": "gf_m2ts_get_adaptation_field",
+    "stack": [
+     {
+      "function": "gf_m2ts_get_adaptation_field",
+      "file": "src/media_tools/mpegts.c"
+     },
+     {
+      "function": "gf_m2ts_process_packet",
+      "file": "src/media_tools/mpegts.c"
+     },
+     {
+      "function": "gf_m2ts_process_data",
+      "file": "src/media_tools/mpegts.c"
+     },
+     {
+      "function": "gf_m2ts_probe_buffer",
+      "file": "src/media_tools/mpegts.c"
+     },
+     {
+      "function": "gf_m2ts_probe_data",
+      "file": "src/media_tools/mpegts.c"
+     },
+     {
+      "function": "m2tsdmx_probe_data",
+      "file": "src/filters/dmx_m2ts.c"
+     },
+     {
+      "function": "gf_filter_pid_raw_new",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "filein_process",
+      "file": "src/filters/in_file.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     }
+    ]
+   },
+   "fix_commit": "08d2d3128f17bd83d534efd708bdaf1248005e9e",
+   "fix_subject": "m2ts prevent string overflow",
+   "patch": "patches/42533061.patch",
+   "files_touched": [
+    "src/media_tools/mpegts.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42533061"
+  },
+  {
+   "id": 42533223,
+   "project": "gpac",
+   "target": "fuzz_probe_analyze",
+   "sanitizer": "asan",
+   "crash_type": "Heap-buffer-overflow READ 1",
+   "severity": "Medium",
+   "cwe": "CWE-125",
+   "location": {
+    "file": "src/filters/inspect.c",
+    "line": 201,
+    "function": "inspect_get_nal_size",
+    "stack": [
+     {
+      "function": "inspect_get_nal_size",
+      "file": "src/filters/inspect.c"
+     },
+     {
+      "function": "inspect_dump_packet",
+      "file": "src/filters/inspect.c"
+     },
+     {
+      "function": "inspect_process",
+      "file": "src/filters/inspect.c"
+     },
+     {
+      "function": "gf_filter_process_task",
+      "file": "src/filter_core/filter.c"
+     },
+     {
+      "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_malloc",
+      "file": "src/utils/alloc.c"
+     },
+     {
+      "function": "gf_filter_pck_new_alloc_internal",
+      "file": "src/filter_core/filter_pck.c"
+     },
+     {
+      "function": "gf_filter_pck_new_alloc",
+      "file": "src/filter_core/filter_pck.c"
+     },
+     {
+      "function": "isor_sample_alloc",
+      "file": "src/filters/isoffin_read_ch.c"
+     }
+    ]
+   },
+   "fix_commit": "5a83f50fe9a6cd513029e37cc723ae53c01807c3",
+   "fix_subject": "inspect: check size against nalu_size_length",
+   "patch": "patches/42533223.patch",
+   "files_touched": [
+    "src/filters/inspect.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42533223"
+  },
+  {
+   "id": 42533348,
+   "project": "gpac",
+   "target": "fuzz_parse",
+   "sanitizer": "asan",
+   "crash_type": "Heap-buffer-overflow WRITE 1",
+   "severity": "High",
+   "cwe": "CWE-787",
+   "location": {
+    "file": "src/utils/base_encoding.c",
+    "line": 300,
+    "function": "gf_gz_decompress_payload_ex",
+    "stack": [
+     {
+      "function": "gf_gz_decompress_payload_ex",
+      "file": "src/utils/base_encoding.c"
+     },
+     {
+      "function": "gf_isom_box_parse_ex",
+      "file": "src/isomedia/box_funcs.c"
+     },
+     {
+      "function": "gf_isom_box_array_read",
+      "file": "src/isomedia/box_funcs.c"
+     },
+     {
+      "function": "wvtt_box_read",
+      "file": "src/media_tools/webvtt.c"
+     },
+     {
+      "function": "gf_isom_box_read",
+      "file": "src/isomedia/box_funcs.c"
+     },
+     {
+      "function": "gf_isom_box_parse_ex",
+      "file": "src/isomedia/box_funcs.c"
+     },
+     {
+      "function": "gf_isom_parse_root_box",
+      "file": "src/isomedia/box_funcs.c"
+     },
+     {
+      "function": "gf_isom_parse_movie_boxes_internal",
+      "file": "src/isomedia/isom_intern.c"
+     },
+     {
+      "function": "gf_isom_parse_movie_boxes",
+      "file": "src/isomedia/isom_intern.c"
+     },
+     {
+      "function": "gf_isom_open_file",
+      "file": "src/isomedia/isom_intern.c"
+     }
+    ]
+   },
+   "fix_commit": "ff627002687235bc6c585fc7ce24137cc6eeb73b",
+   "fix_subject": "gz_uncompress: add size check",
+   "patch": "patches/42533348.patch",
+   "files_touched": [
+    "src/utils/base_encoding.c"
+   ],
+   "report": "https://issues.oss-fuzz.com/issues/42533348"
+  }
+ ],
+ "verification": {
+  "baseline_run": "reports/baseline-run.log",
+  "baseline_crash": 27,
+  "one_by_one": "reports/verify-one-by-one.json",
+  "one_by_one_pass": 27,
+  "dropped_before_delivery": [
+   42532225,
+   42533590,
+   42533608,
+   42532896,
+   42532983,
+   42533242
+  ],
+  "dropped_by_one_by_one": [
+   42532226,
+   42532406,
+   42532845,
+   42533013,
+   42533592,
+   42533693
+  ],
+  "dropped_note": "before: PoC did not crash the baseline (defect newer than the baseline) or the fix could not be expressed against it; at one-by-one: the patch applied but the PoC kept crashing, i.e. the recorded fix_commit does not cover the code path the PoC exercises"
+ }
+}
