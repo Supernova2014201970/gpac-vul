@@ -1,164 +1,222 @@
-# gpac-vul — dataset specification
+# 漏洞数据仓库规约
 
-一个可复现的 gpac 漏洞集：源码基线固定在一个 commit，27 条 OSS-Fuzz 崩溃案例各自带一个
-独立补丁与一个 PoC，容器内可一键验证"基线崩、打补丁不崩"。
+参考实例：`imagemagick-vul`
 
-本文件是这份数据的**契约**：下面的表格、字段、命令与判定规则都是被校验的；校验结果在
-`reports/`（`verify.json`、`verify-one.json`、`verify-one-by-one.json`）。
+## 1. 仓库命名与基本原则
 
-字段、目录与报告格式与同批次的 `imagemagick-vul`、`ffmpeg-vul` 保持一致，三者可以直接
-并排当作同一套数据的三个实例。
+仓库名采用 `<project>-vul`，例如 `imagemagick-vul`、`libpng-vul`、`libxml2-vul`。
 
-## 1. 范围
+- 必须使用小写字母、数字和连字符，project 与元数据中的项目标识一致。
 
-| 项 | 值 |
+## 2. 标准目录
+
+```text
+<project>-vul/
+├── README.md
+├── MANIFEST.md
+├── image/
+│   └── Dockerfile
+├── src/
+│   └── <project>-readonly/
+├── payload/
+│   ├── vulnerabilities.json
+│   ├── patches/
+│   │   └── <fix_commit>.patch
+│   └── pocs/
+│       └── <case_id>/
+│           └── poc
+├── scripts/
+│   ├── lib.sh
+│   ├── build.sh
+│   ├── verify-one.sh
+│   ├── verify.sh
+│   └── verify-one-by-one.sh
+└── reports/
+    ├── verify.json
+    ├── verify-one.json
+    └── verify-one-by-one.json
+
+```
+
+| 路径 | 要求与用途 |
 | --- | --- |
-| 项目 | gpac（`https://github.com/gpac/gpac`，C） |
-| 基线 | `b890f1c443dbe1f941cd326d4473ce7ddef8e256`（2024-01-17，修复窗口前一个提交） |
-| 案例 | 27 条，全部来自 ARVO（OSS-Fuzz 报告 + 已复现）；每条都在基线上实跑确认仍崩，且实跑确认自己的补丁能清掉它（§7） |
-| 时间窗 | 修复提交落在 2024-01-17 … 2024-03-12 |
-| 修复提交 | 每条案例一个**不同**的 upstream 提交（1:1），无多案例共用提交 |
-| fuzz 目标 | `fuzz_probe_analyze`（26）、`fuzz_parse`（1） |
-| sanitizer | ASan 20、UBSan 7，按上报该案例的那一套回放 |
-| 崩溃类型 | 13 种（HBO-R/W、SBO-R/W、GBO、UAF、UNKNOWN、Index-out-of-bounds 等） |
+| `README.md` | 必须，使用说明、环境条件和接口契约 |
+| `MANIFEST.md` | 必须，文件清单、大小和校验值 |
+| `image/Dockerfile` | 必须，定义可重建运行环境 |
+| `src/<project>-readonly/` | 必须，只读的基线源码副本 |
+| `payload/` | 必须，机器可读的案例、漏洞信息、PoC 和补丁 |
+| `scripts/` | 必须，构建与验证入口 |
+| `reports/` | 必须，发布前结果、日志及运行环境信息 |
 
-时间窗与 1:1 的约束是为了"单个基线仍然包含全部缺陷"：所有修复都在基线之后，且没有一条
-案例需要靠别人的修复才成立。基线是否真的对每条 PoC 都崩，由 `verify.sh` 实际跑出来判定，
-不是推断。
+`payload/cases.tsv`（案例索引）与 `scripts/hand_repro.cc`（复现驱动）是本包针对 ImageMagick 的实现，**不属于通用要求**：其他漏洞仓按自身的构建与复现方式组织，可以没有这两个文件，也可以用别的形式承载同样的信息。
 
-## 2. 目录
 
-```
-gpac-vul/
-  src/gpac-readonly/              基线的纯拷贝（无 .git），与镜像内 /src/gpac 逐字节一致
-  payload/
-    cases.tsv                     案例表（见 §4）
-    pocs/<localId>/poc            每条案例的 PoC，原样来自 OSS-Fuzz testcase
-    patches/<fix_commit>.patch    每条案例的补丁，以修复提交命名（见 §5）
-    patch-index.json              以修复提交为键：影响文件、提交主题、日期
-    vulnerabilities.json          位置、调用栈、代码片段、描述（见 §6）
-  scripts/
-    lib.sh                        共享函数（指纹、构建、回放、判定）
-    build.sh                      无 sanitizer 的普通构建
-    verify.sh                     基线全量验证：每条 PoC 都必须 CRASH
-    verify-one.sh                 单条：基线 CRASH + 打补丁 CLEAN
-    verify-one-by-one.sh          全量归属验证，写 reports/verify-one-by-one.json
-    fuzz_probe_analyze.c          从 gpac/testsuite 8693a5a2 取的 OSS-Fuzz 目标
-    fuzz_parse.c                  同上
-    standalone_main.c             单输入驱动（替代 libFuzzer 运行时）
-  image/Dockerfile                可复现环境
-  reports/
-    verify.json                   基线全量：27 条全 CRASH
-    verify-one.json               最近一次单条验证
-    verify-one-by-one.json        全量归属：27 条全 PASS
-```
+## 3. 基线源码格式
 
-镜像内固定位置：`/src/gpac`（基线树）、`/payload`、`/opt/gpdt`（脚本）、`/out`（复现器）、
-`/work`（构建目录）、`/reports`。脚本目录必须加入 `PATH`，不设命令分发层。
+`src/<project>-readonly/` 必须对应 `baseline.commit`，该字段使用完整提交 ID。
 
-## 3. 环境变量
+- 必须包含构建所需源码、配置文件及必要资源。
+- 目录名以 `-readonly` 结尾，表示该副本只读：不得在其中构建、打补丁或修改文件。目录名是约定，不在文件系统上强制权限；需要构建或应用补丁时应复制出去再操作。
+- 该副本不含 `.git`，作为普通文件随仓库提交，不用子模块（gitlink）记录；基线身份由 `baseline.commit`、`describe` 和 MANIFEST 的 `src/` 统计确定。
+- 发布前必须保持基线工作区干净，不混入普通或插桩构建产物。
+- 本地源码与镜像中基线的已跟踪文件内容必须一致；
+- README、漏洞元数据和 Dockerfile 中的基线身份必须一致。
 
-| 变量 | 默认 | 含义 |
-| --- | --- | --- |
-| `GPDT_TREE` | `/src/gpac` | 基线源码树（可指向任意副本） |
-| `PAYLOAD` | `/payload` | 案例数据 |
-| `OUT` | `/out` | 复现器输出 |
-| `WORK` | `/work` | 构建目录 |
-| `GPDT_COLD` | 未设 | 设为 1 时打补丁的树走全量重建，而不是复用基线构建目录做增量 |
 
-源码指纹 `src_fp()`：git 树取 `<commit8>-<sha256(git diff)[:8]>`；无 `.git` 的纯拷贝取
-`tree-<sha256(所有文件内容)[:16]>`。指纹进入构建目录名与复现器名，所以基线与每个打补丁
-的副本互不覆盖。
+## 4. 漏洞元数据 vulnerabilities.json
 
-## 4. cases.tsv
-
-制表符分隔，`#` 开头为注释，一案例一行，8 列：
-
-```
-localId  fuzzer  sanitizer  alert  expect_frame  poc  patch  fix_commit
-```
-
-- `localId` 是 ARVO/OSS-Fuzz 的 testcase id，也是 `pocs/<localId>/` 的目录名；
-- `fuzzer` ∈ `fuzz_probe_analyze|fuzz_parse`，决定链接哪个 OSS-Fuzz 目标；
-- `sanitizer` ∈ `asan|ubsan`，决定用哪套 flags 编译、哪套 `*_OPTIONS` 运行；
-- `alert` 是 sanitizer 的原始措辞（与 `vulnerabilities.json` 的 `type.crash_type` 一致）；
-- `expect_frame` 是报告点名的帧，与 `vulnerabilities.json` 的 `location.function` 一致；
-- `patch` 形如 `patches/<fix_commit>.patch`，与该行 `fix_commit` 对应。
-
-## 5. 补丁
-
-- 每条案例一个补丁，由它的 upstream 修复提交导出，**只含本案例的改动**，文件名为
-  `<fix_commit>.patch`。
-- 导出方式：优先用 `git diff <fix>^ <fix>`；当上下文在基线与修复之间移动过时，把该提交
-  cherry-pick 到基线上取树差异。两种情况都保证补丁能落到基线上，代价是个别补丁应用时带
-  行偏移（`patch` 报 `offset -7 … -10 lines`，`Hunk succeeded`），不影响被修改的行。
-- 27 个补丁都能对基线应用（`check_package.py` 逐个核对每个 hunk 的上下文仍存在于基线）。
-- 因为案例之间是不同提交，补丁在文件层面大多互斥；少数几个提交改同一文件的不同 hunk
-  （`src/media_tools/av_parsers.c` 6 个、`src/ietf/rtsp_session.c` 3 个、
-  `src/ietf/sdp.c` 3 个、`src/utils/token.c` 2 个），彼此不覆盖；31 个补丁只动一个文件。
-
-## 6. vulnerabilities.json
+顶层格式：
 
 ```json
 {
   "project": "gpac",
   "repo": "https://github.com/gpac/gpac",
-  "baseline": {"commit": "...", "describe": "...", "date": "...", "note": "..."},
-  "paths": {"cases": "cases.tsv", "pocs": "pocs/<localId>/poc",
-            "patches": "patches/<fix_commit>.patch"},
-  "vulnerabilities": [
+  "baseline": {
+    "commit": "b890f1c443dbe1f941cd326d4473ce7ddef8e256",
+    "describe": "v2.2.0-751-gb890f1c44",
+    "date": "2024-01-17",
+    "note": "数据集只有这一个节点：随包 src/gpac-readonly 与镜像 /src/gpac 都是它的导出（不含 .git，内容指纹 tree-3fb52327008566a2）。27 个 PoC 在此节点全部崩溃；把某条案例的 patch 单独应用后再跑，就不再崩溃。"
+  },
+  "paths": {
+    "cases": "cases.tsv",
+    "pocs": "pocs/<localId>/poc",
+    "patches": "patches/<fix_commit>.patch"
+  },
+  "vulnerabilities": []
+}
+```
+
+每个漏洞案例的格式如下。示例中的通用路径和代码片段仅说明字段结构：
+
+```json
+{
+  "id": "42531304",
+  "type": {
+    "crash_type": "Heap-buffer-overflow READ {*}",
+    "cwe": "CWE-125",
+    "cwe_name": "Out-of-bounds Read"
+  },
+  "location": {
+    "file": "源码相对路径",
+    "line": 100,
+    "function": "函数名",
+    "stack": [
+      {"function": "函数名", "file": "源码相对路径"},
+      {"function": "调用者", "file": "源码相对路径"}
+    ]
+  },
+  "code_snippet": {
+    "before": "基线代码片段",
+    "after": "应用随包补丁后的代码片段",
+    "fix_summary": "修复原理"
+  },
+  "description": "触发条件、问题原因及修复方式",
+  "patch": "patches/538b229cab5e6317053c15c66417a9d053681ad0.patch"
+}
+```
+
+要求：
+
+- `id` 与 TSV 的 `localId` 必须一一对应，集合一致，不能重复或缺失。
+- `patch` 必须与 TSV 一致；补丁正文不重复内嵌到 JSON 中。
+- `before`、`after` 必须来自实际基线和应用随包补丁后的源码，不能仅按上游最新代码填写。
+- `location` 只记录崩溃报告位置（sanitizer 栈顶），`location.line` 是基线中的行号；`code_snippet` 只给 `before`、`after`、`fix_summary`，不重复携带 `file`/`function`/`line`。片段出处就是 `patch` 所指补丁中对应 hunk 的位置，可能与 `location` 不同（崩溃点落在头文件内联函数、修复在被调函数里就是这种情形），需要点明时写在 `description` 或 `fix_summary` 里。
+- `location.stack` 是同一份报告里的调用栈（sanitizer 的 `#N` 帧）：由内向外，只保留源码树内的业务代码帧——去掉 `LLVMFuzzerTestOneInput`、`main` 这类入口和 `*/fuzz/*`、`*_fuzzer.c`/`*_fuzzer.cc` 这类 fuzz 驱动文件，从第一个业务帧开始；路径按报告里的相对写法，最多 10 帧（截断时保留靠内一侧）。每帧只记 `function` 和 `file`，**不记行号**：行号会随修复漂移，而且同一函数里的不同分支在栈上没有区别。
+- `stack` 里必须有一帧的 `function`、`file` 与 `location` 相同（通常是首帧；首帧定位不到源码行时 `location` 取其后的第一个可定位帧，首帧仍原样留在栈里）。栈的用途是把「`location` 相同」的案例分开：位置相同不代表同一个问题，同一个头文件内联函数可以由不同解码器的不同调用路径走到。
+- 判断顺序：先看 `location.stack`；栈也完全相同的案例（同一函数里两处缺陷、或多条 PoC 走同一条调用链）以 `patch` 和 `description` 区分。栈只到函数/文件粒度，同一函数内的不同分支不会体现出来。未知时 `stack` 允许为 `null`。
+- 未知的 CWE、源码位置、函数和片段允许使用 `null`，不得猜测填充；其他必需字段必须有效。
+- `description` 必须区分源码缺陷修复、资源限制、测试驱动约束等不同修复方式。
+
+## 5. PoC 与补丁
+
+PoC 保存为 `payload/pocs/<case_id>/poc`，
+
+补丁保存为 `payload/patches/<fix_commit>.patch`：
+
+- 必须是可供 `git apply` 使用的 unified diff，路径相对于源码根目录。
+- 必须在干净基线上通过 `git apply --check`，且能独立应用。
+- 多个案例引用同一补丁时必须复用同一文件。
+
+## 6. 脚本与复现接口
+
+| 接口 | 职责 |
+| --- | --- |
+| `build.sh [--tree DIR]` | 普通构建指定源码并检查产物，不运行 PoC |
+| `verify-one.sh ID [--tree DIR]` | 在指定源码（缺省基线）上测试一个案例 |
+| `verify-one.sh ID --patched [--tree DIR]` | 复制指定源码、应用当前案例补丁，测试同一个 PoC |
+| `verify.sh [--tree DIR]` | 遍历全部案例，汇总基线结果 |
+| `verify-one-by-one.sh [--tree DIR]` | 遍历案例，分别验证各自补丁 |
+
+通用要求：
+
+- 普通编译与插桩编译必须使用独立产物，不得错误混用。
+- 补丁验证必须复制源码，不能修改原始基线；各案例补丁不累计。
+- 三个验证脚本必须能通过 `--tree DIR` 指向 `/src/<project>` 之外的源码目录，且不修改该目录。
+- 不设命令分发层：脚本本身就是接口，交付文档与示例一律直接写 `build.sh`、`verify.sh`、`verify-one.sh`、`verify-one-by-one.sh`，不引入 `build`/`verify`/`verify-one` 这类包装命令或二级子命令。
+- 脚本目录（本数据集为 `/opt/gpdt`）必须加入 `PATH`，脚本带执行位，因此上表四条命令可直接按名调用，读者不需要拼全路径。
+
+参考调用关系：
+
+```text
+build.sh → 普通 configure + make
+verify.sh → verify-one.sh --tree DIR
+verify-one-by-one.sh → verify-one.sh --patched --tree DIR
+```
+
+## 7. README 漏洞分布要求
+
+README 必须包含“漏洞分布”章节，依据随包元数据与案例索引统计，不得仅给出总数或用测试运行次数替代案例数。必须写明统计所用文件、基线范围、统计单位、去重规则和占比的分母。
+
+至少包含以下内容：
+
+| 维度 | 必需内容与统计口径 |
+| --- | --- |
+| 总体规模 | 案例数、PoC 数、唯一补丁数；明确案例数不等于独立根因数 |
+| 漏洞类型 | 按主 CWE 分组，列出 CWE 编号、名称、案例数及占比；未知类型单列，不能省略 |
+| 检测方式 | 按 sanitizer 或项目对应检测方式分组，列出案例数及占比 |
+| 源码模块 | 按 location.file 的目录/模块分组，明确路径规范化和模块划分规则；不能把报告位置直接称为根因位置 |
+| 输入类别 | 按输入格式、协议或功能入口分组并列出案例数；项目不适用时明确说明 |
+| 补丁对应关系 | 列出每个补丁对应案例数的分布，以及各组补丁数、覆盖案例数；共享补丁给出可追溯的提交或路径 |
+
+各维度必须独立统计，不能跨维度相加。默认以案例 ID 去重，每个案例在同一维度只计入一个主分类；使用多标签时必须明确可能重复计数及其分母。比例必须注明舍入精度，分类总数应与总体规模核对。表格可合并长尾为“其他”，但必须给出其数量及合并规则。
+
+资源限制、测试驱动约束等补丁应说明作用方式，不得将多个 PoC 的消失直接表述为多个独立根因被修复。分布必须随案例或补丁变化同步更新，并重新生成 MANIFEST 中受影响文件的校验值。
+
+## 8. 报告格式与退出码
+
+三份报告由脚本直接生成，顶层固定为 `pass`、`fail`、`results`，不设 `error` 计数，条目也不设 `status`。
+
+| 报告 | 生成者 | 条目字段 | `pass` / `fail` 的口径 |
+| --- | --- | --- | --- |
+| `verify.json` | `verify.sh` | `poc`、`pass`、`alert` | CLEAN 条数 / 其余条数 |
+| `verify-one.json` | `verify-one.sh` | `poc`、`pass`、`alert` | 该案例 CLEAN 时为 `1`/`0`，否则为 `0`/`1` |
+| `verify-one-by-one.json` | `verify-one-by-one.sh` | `poc`、`patch`、`pass`、`alert` | `pass` 为 true 的条数 / 其余条数 |
+
+`patch` 只记录补丁文件名（如 `9998cd71….patch`），不带 `patches/` 前缀。基线单案例示例：
+
+```json
+{
+  "pass": 0,
+  "fail": 1,
+  "results": [
     {
-      "id": "42531304",
-      "type": {"crash_type": "Heap-buffer-overflow READ {*}",
-               "cwe": "CWE-125", "cwe_name": "Out-of-bounds Read"},
-      "location": {
-        "file": "src/utils/xml_parser.c",
-        "line": 977,
-        "function": "xml_sax_append_string",
-        "stack": [{"function": "xml_sax_append_string", "file": "src/utils/xml_parser.c"}, ...]
-      },
-      "code_snippet": {"before": "...", "after": "...", "fix_summary": "..."},
-      "description": "`src/utils/xml_parser.c:977`（`xml_sax_append_string`）：……",
-      "patch": "patches/538b229cab5e6317053c15c66417a9d053681ad0.patch"
+      "poc": "42531304",
+      "pass": false,
+      "alert": "Heap-buffer-overflow READ {*}"
     }
   ]
 }
 ```
 
-- `type.crash_type` 与 cases.tsv 的 `alert` 逐字一致；`cwe_name` 是 `cwe` 的英文名。
-- `location` 是上报栈里最内层的**业务**帧（函数 + 文件 + 行号）：行号来自报告，基线树
-  可能与报告版本有偏移，行号仅作定位参考。
-- `stack` 只记函数与文件，不记行号；由内向外排列，去掉 fuzz 驱动帧（`LLVMFuzzerTestOneInput`、
-  `main`、`fuzz_*.c`），最多 10 帧。`location.function` 恒等于 `stack[0].function`。
-- `code_snippet.before`/`after` 是补丁第一个 hunk 的改前/改后文本（上下文 + 增删行），
-  `fix_summary` 是一句话概括（函数、提交主题、增删行数）。
-- `description` 说明位置、触发路径与修复动作。
+输出位置：`--report DIR` 未指定时写入**相对当前工作目录**的 `reports/`，文件名固定为 `verify.json`、`verify-one.json`、`verify-one-by-one.json`，同名文件直接覆盖。容器的默认工作目录是 `/opt/gpdt`，所以不加 `--report` 就会写进随包报告目录 `/opt/gpdt/reports/`；要保留随包报告就显式指定目录，例如 `--report /tmp/baseline-report`。
 
-## 7. 验证规则
+退出码：
 
-- `build.sh`：无 sanitizer 的 configure/make，产出 `libgpac_static.a`。
-- `verify.sh [--tree DIR] [--report DIR]`：对基线逐条跑 PoC，**每条都必须 CRASH**；任一不崩
-  即退出非 0。写 `verify.json`：`{"pass": 0, "fail": 27, "results": [{"poc", "pass", "alert"}]}`。
-- `verify-one.sh <pocId> [--patched] [--tree DIR] [--report DIR] [--keep]`：单条。默认跑基线
-  （期望 CRASH / `pass: false`）；`--patched` 时把该案例的补丁单独应用到基线副本再跑
-  （期望 CLEAN / `pass: true`）。写 `verify-one.json`。
-- `verify-one-by-one.sh [--tree DIR] [--report DIR]`：对全部案例执行上面的 `--patched` 检查，
-  写 `verify-one-by-one.json`：`{"pass": 27, "fail": 0, "results": [{"poc", "patch", "pass", "alert"}]}`，
-  `fail` 必须为 0。
-- 三份报告里 `pass` 的含义统一为"**PoC 没有让被测树崩**"，所以基线是 0、打补丁侧是全量。
-- 判定用退出码 + sanitizer 报告行（`SUMMARY: ...Sanitizer` / `==N==ERROR: ...` /
-  `runtime error:`），不看崩溃地址。`ERROR`（无报告但非 0 退出）算失败，不算通过。
+| 命令 | `0` | 非 `0` |
+| --- | --- | --- |
+| `verify.sh` | 没有任何案例返回 CLEAN（`clean=0`） | 至少一条 CLEAN |
+| `verify-one.sh <id>` | 该案例 CRASH（`pass=false`） | 该案例 CLEAN |
+| `verify-one.sh <id> --patched` | 该案例 CLEAN（`pass=true`） | 该案例仍 CRASH，或补丁无法应用 |
+| `verify-one-by-one.sh` | 全部 `pass=true`（`fail=0`） | 至少一条 `pass=false` |
 
-## 8. 已知边界
-
-- 只覆盖"基线仍然崩"且"自己的补丁能清掉它"的案例。两轮实测剔除 12 条：
-  ① 3 条（`42532225`、`42533590`、`42533608`）在基线上不崩——缺陷晚于基线引入；
-  ② 3 条（`42532896`、`42532983`、`42533242`）的修复无法在不牵进别人改动的前提下落到基线上；
-  ③ 6 条（`42532226`、`42532406`、`42532845`、`42533013`、`42533592`、`42533693`）补丁
-  应用后 PoC 仍崩——记录的 fix commit 不在该 PoC 触发的代码路径上（多案例改同一文件的
-  窗口里 ARVO 归属偏差）。原始候选集是 39 条，最终 27 条。
-- 补丁是"该案例的最小修复"，不是上游提交的完整还原：cherry-pick 模式下树差异可能包含
-  少量上下文调整，应用时可能带行偏移。
-- `code_snippet` 只取第一个 hunk：多 hunk 的补丁在这里只展示主改动，完整改动看补丁文件。
-- 构建去掉了 SDL/pulse/alsa/X11 等模块（镜像里有头无库；OSS-Fuzz 自己的镜像也没有），
-  与上游 fuzzer 构建一致。
+判据只有 `pass` 一个维度：`pass=true` 表示该 PoC 没有打崩被测源码树。运行本身失败的情形——子进程异常退出、内存分配失败、MSan 运行时启动崩溃在重试后仍无输出——同样记为 `pass=false`，因此基线报告的 `fail`/`crash` 计数包含这类运行失败，无法与真实崩溃区分。两个批量脚本不校验子进程退出码，缺失 `RESULT` 行也按 `pass=false` 计入。所以 `clean=0` 或 `fail=0` 带来的退出码成立，并不证明每条记录都产生了 sanitizer 报告；验收时必须同时核对案例数、运行日志和报告条数。

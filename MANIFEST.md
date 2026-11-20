@@ -1,13 +1,13 @@
 # MANIFEST
 
-72 files outside the source snapshot, 284837 bytes.
+72 files outside the source snapshot, 294952 bytes.
 
 Source tree: `src/gpac-readonly/` — 1289 files, content fingerprint `tree-3fb52327008566a2` (sha256 over `sha256(file)  ./path` lines, sorted, excluding .git).
 
 ```
-4f5b8aa670e56abe2d48c4e5f407b23ed8fd34319824711cd1b3092dec0d8580      8602  MANIFEST.md
-775dcb346903c76a2ba99a3cd02908df4f10233701250717ea847734de94a841      4561  README.md
-69cd73216563fb3391a1f11e49be30c62f2cc801c9e05d4ef466b21522d9cb5b      9544  SPECIFICATION.md
+87b411d1e3eb7aa562db0b2b6c6c607a1bd9acddd2529de05ee25a71c74048cf      8602  MANIFEST.md
+a28299d202c9a0f03b1e836c127e50f30e2c0fc7a21e54c64f8c493be5e4c4c7     11558  README.md
+1b0a43a23a1e1f7a2e3f94fcb5f3e19b1c3c70fb994fc529cdd919f6408caea7     12110  SPECIFICATION.md
 3d68d6fd35ac61b331671f387ce2fd52d6e79e0525acf127932487bdbda2622b      3207  image/Dockerfile
 6d91425fa2097b63d5ce8a9ec0328a44228ccf83c963a02c603bf211f69955c5      5539  payload/cases.tsv
 39f1d93483f261558b83fa092f949f02d11e4f7994ff2ab80eb83bd9dff0a616      6231  payload/patch-index.json
@@ -69,10 +69,10 @@ b953341cd32b8d57d5eedc1e18b9b46a86aff8f3b3c2c2b560eb2fbac5985a15        32  payl
 f0053b7b25f1ed2bc75a6dc28d6abfce7ec156e31ad72bc93c2c7cc7f528d154      3666  reports/verify-one-by-one.json
 7fdbb40689a08e7a41713ff0d9b34c3758b29942032de8551a78ee081d4bea81       118  reports/verify-one.json
 ce144b7ebbca1d5ce1b69b04f72de8d7697e4c0d4d6d2fc496022abbec19e7cc      2100  reports/verify.json
-bd8c8d961bb33840d75cc482fd128af735f6b00a98d4260e7a82a473f134d907      1156  scripts/build.sh
+6d27fb3c6fa0a27a5d75e73820481cb615c8fef51fffb0380cc64bac7dec5f41      1587  scripts/build.sh
 9b5c46d816e7a62c911ccee847028aba77761d88550b483bfe4324450e0293fa       576  scripts/fuzz_parse.c
 5c1f38bcf4b72efc589ce37e4183e5e1bc561d5627cd954c0f5dee372a02bb9e       630  scripts/fuzz_probe_analyze.c
-8dff63026b9f4cbbae9482ef9cce2e247c3fd15adff911a64d17f525f410d4aa     10526  scripts/lib.sh
+46ff6df3f2f155065dee0734098607b4c8f1e19c9ddbcaf4a0eb80b8a3113f92     10647  scripts/lib.sh
 92013307dfec88a0d92959ef8c1c13fd006c07f34acc2826c2be1dff17d4da4d      1234  scripts/standalone_main.c
 f40c535935e2190ae60e833781b443e295fc84e7780df4ab27d747906ac624c9      2315  scripts/verify-one-by-one.sh
 aed653641beb1c266605e9a0bfae71876d65a7c515cbefa1d1fb4f77edd473f0      3839  scripts/verify-one.sh

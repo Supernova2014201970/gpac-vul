@@ -84,6 +84,31 @@ run_poc() {
   printf 'ERROR\texit=%s\n' "$rc"
 }
 
+# headless_configure <srcdir> <extra cflags/ldflags> <log>
+#
+# Everything that would drag in a windowing or audio backend is switched off:
+# this image ships SDL 1.2 headers, pulse/alsa headers and X11 stubs without the
+# libraries behind them, and OSS-Fuzz's own image has none of them, so the
+# upstream build is equally bare.  `--disable-x11` also drops sdl/directx
+# (gpac's configure folds the three).
+#
+# configure then decides the rest by probing headers and ignores --disable-<pkg>
+# for some of them (they are features, not packages, in its option parser): the
+# headers are here but the libraries are not, so the objects would reference
+# symbols that cannot be linked.  Flip those CONFIG_*=yes to no afterwards.
+headless_configure() {
+  local dir=${1:?} flags=${2:-} log=${3:?}
+  ( cd "$dir" && ./configure --static-build --disable-x11 --disable-sdl --sdl-cfg=/nonexistent \
+      --disable-pulseaudio --disable-alsa --disable-oss --disable-jack \
+      --disable-directfb --disable-libcaca \
+      --extra-cflags="$flags" --extra-ldflags="$flags" > "$log" 2>&1 ) ||
+    { tail -n 20 "$log" >&2; return 1; }
+  local pkg
+  for pkg in SDL X11 PULSEAUDIO ALSA JACK OSS DIRECTFB LIBCACA DVB4LINUX DIRECTX TINYGL VTB HID; do
+    sed -i "s/^CONFIG_${pkg}=yes/CONFIG_${pkg}=no/" "$dir/config.mak"
+  done
+}
+
 # ensure_libs <srcdir> <sanitizer> -> prints the private build directory
 #
 # Copies the tree to /work/build-<fp>-<san>/src (never builds inside the source
@@ -105,25 +130,8 @@ ensure_libs() {
   cd "$bld/src" || die "cannot enter $bld/src"
 
   echo "build   $dir [$s] -> $bld" >&2
-  # Headless fuzz build.  Everything that would drag in a windowing or audio
-  # backend is switched off: this image ships SDL 1.2 headers, pulse/alsa headers
-  # and X11 stubs without the libraries behind them, and OSS-Fuzz's own image has
-  # none of them, so the upstream fuzzer build is equally bare.
-  #   --disable-x11 also drops sdl/directx (gpac's configure folds the three).
-  ./configure --static-build --disable-x11 --disable-sdl --sdl-cfg=/nonexistent \
-    --disable-pulseaudio --disable-alsa --disable-oss --disable-jack \
-    --disable-directfb --disable-libcaca \
-    --extra-cflags="$flags" --extra-ldflags="$flags" \
-    > "$bld/configure.log" 2>&1 ||
-    { tail -n 20 "$bld/configure.log" >&2; die "configure failed ($fp/$s)"; }
-  # configure decides these by probing headers and then ignores --disable-<pkg>
-  # for them (they are features, not packages, in its option parser).  This image
-  # has the headers but not the libraries, so the objects would reference symbols
-  # that cannot be linked.  OSS-Fuzz's own image has neither, and its configure
-  # run ends with the same "no" here.
-  for pkg in SDL X11 PULSEAUDIO ALSA JACK OSS DIRECTFB LIBCACA DVB4LINUX DIRECTX TINYGL VTB HID; do
-    sed -i "s/^CONFIG_${pkg}=yes/CONFIG_${pkg}=no/" "$bld/src/config.mak"
-  done
+  headless_configure "$bld/src" "$flags" "$bld/configure.log" ||
+    die "configure failed ($fp/$s)"
   make -j"${MAKE_JOBS:-4}" > "$bld/make.log" 2>&1 ||
     { grep -m5 -E 'error:|undefined reference' "$bld/make.log" >&2; tail -n 20 "$bld/make.log" >&2
       die "make failed ($fp/$s)"; }
