@@ -149,16 +149,20 @@ headless 配置构建：
 
 `cases.tsv` 的列为 `localId fuzzer sanitizer alert expect_frame poc patch fix_commit`。
 27 个案例对应 27 个 PoC、27 个补丁，每个补丁只对应 1 条案例。补丁按 fix commit 命名；
-其中至少 2 个补丁（`42531500`、`42532224`）应用到基线时带行偏移（`offset -7 … -10 lines`，
-`Hunk succeeded`），是 cherry-pick 导出带来的上下文移动，不影响被修改的行。
+其中 15 个补丁应用到基线时至少有一个 hunk 带行偏移（`Hunk succeeded at N (offset -K lines)`，
+最大 `-49`，见 `07c6c799`/42531371），是 cherry-pick 导出带来的上下文移动。27 个补丁都能
+`patch -p1` 干净应用，被修改的行本身不变。
 
 `vulnerabilities.json` 包含 `project`、`repo`、`baseline`、`paths`、`vulnerabilities`；
 每个漏洞给出 `id`、`type`、`location`、`code_snippet`、`description` 和 `patch` 路径。
 
-- `location` 是崩溃报告位置（sanitizer 栈顶的业务帧），行号来自报告，基线可能与报告版本
-  有偏移。
-- `location.stack` 由内向外、最多 10 帧，每帧只有函数与文件（不记行号），已去掉
-  `LLVMFuzzerTestOneInput` 与 `tools/target_dec_*` 一类 fuzz 驱动帧。
+- `location` 是崩溃报告位置（sanitizer 栈顶的业务帧），行号是**交付基线中的行号**：2026-11-20
+  在 `gpac-vul:b890f1c` 镜像内重跑 27 个 PoC，按同一份崩溃日志重新抽取，`file:line` 均可
+  在 `src/gpac-readonly/` 里对齐到对应函数。
+- `location.stack` 由内向外、最多 10 帧（超长时保留靠内一侧），每帧只有函数与文件（不记
+  行号）。只取崩溃的那一段 trace，在空行 / `allocated by` / `freed by` / `in frame` 处截断，
+  不会把 ASan 的分配/释放回溯拼进来；同时去掉 `__strdup`、`memcpy` 一类 sanitizer 拦截器
+  帧和 `LLVMFuzzerTestOneInput`、`main` 一类 fuzz 驱动帧。
 - `code_snippet` 只含 `before`、`after`、`fix_summary`，片段出自补丁第一个 hunk，位置
   可以与 `location` 不同；这种情况写在 `description` 里。
 
@@ -203,27 +207,25 @@ headless 配置构建：
 
 | 模块 | 案例数 | 占比 |
 | --- | --- | --- |
-| `src/media_tools` | 7 | 25.9% |
-| `src/utils` | 7 | 25.9% |
-| `src/filters` | 6 | 22.2% |
+| `src/media_tools` | 9 | 33.3% |
+| `src/filters` | 7 | 25.9% |
+| `src/utils` | 5 | 18.5% |
 | `src/ietf` | 4 | 14.8% |
-| `src/filter_core` | 3 | 11.1% |
+| `src/filter_core` | 2 | 7.4% |
 | 合计 | 27 | 99.9% |
 
 ### 7.4 按功能入口
 
-按 `location.stack` 最外层业务帧所在目录统计，每个案例计一次；它近似表示 PoC 进入
-gpac 的入口模块（解析/解复用 → 过滤链 → 核心）。PoC 是二进制文件，元数据里没有输入
-格式标注，因此本包不按容器格式分组。
+按 `location.stack` 最外层帧所在目录统计，每个案例计一次；它近似表示 PoC 进入 gpac 的
+入口模块（解析/解复用 → 过滤链 → 核心）。栈被截到 10 帧时取第 10 帧，所以入口模块是
+下界：3 条案例（42532195、42532480、42532650）的栈止于 `filelist_process`，实际最外层
+仍是 `gf_fs_run`。PoC 是二进制文件，元数据里没有输入格式标注，因此本包不按容器格式分组。
 
 | 入口 | 案例数 | 占比 |
 | --- | --- | --- |
-| `src/filter_core`（`gf_fs_run` → 过滤器调度） | 15 | 55.6% |
-| `src/filters`（各 demux/reframe 过滤器） | 6 | 22.2% |
-| `src/utils` | 2 | 7.4% |
-| `src/media_tools` | 2 | 7.4% |
-| `src/ietf` | 1 | 3.7% |
-| `src/isomedia` | 1 | 3.7% |
+| `src/filter_core`（`gf_fs_run` → 过滤器调度） | 23 | 85.2% |
+| `src/filters`（栈在 `filelist_process` 处截断） | 3 | 11.1% |
+| `src/isomedia`（`gf_isom_open_file`） | 1 | 3.7% |
 | 合计 | 27 | 100.0% |
 
 ### 7.5 案例与补丁对应分布

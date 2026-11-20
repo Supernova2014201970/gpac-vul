@@ -118,14 +118,6 @@
      {
       "function": "gf_fs_run",
       "file": "src/filter_core/filter_session.c"
-     },
-     {
-      "function": "gf_strdup",
-      "file": "src/utils/alloc.c"
-     },
-     {
-      "function": "gf_url_concatenate_ex",
-      "file": "src/utils/url.c"
      }
     ]
    },
@@ -134,7 +126,7 @@
     "after": "{\n\tif (!strnicmp(sURL, \"file://\", 7)) {\n\t\t/*file:///C:\\ scheme*/\n\t\tif ((strlen(sURL)>=10) && (sURL[7]=='/') && (sURL[9]==':')) {\n\t\t\tmemmove(sURL, sURL+8, strlen(sURL)-7);\n\t\t} else {\n\t\t\tmemmove(sURL, sURL+7, strlen(sURL)-6);",
     "fix_summary": "gf_url_to_fs_path：fixed possible mem overread（+1/-1 行）"
    },
-   "description": "`src/utils/url.c:432`（`gf_url_to_fs_path`）：Heap-buffer-overflow READ 1。PoC 经 `gf_fs_load_source_dest_internal` → `gf_url_to_fs_path` 进入，栈深 10 帧；修复为 fixed possible mem overread（src/utils/url.c，+1/-1 行）。",
+   "description": "`src/utils/url.c:432`（`gf_url_to_fs_path`）：Heap-buffer-overflow READ 1。PoC 经 `gf_fs_load_source_dest_internal` → `gf_url_to_fs_path` 进入，栈深 8 帧；修复为 fixed possible mem overread（src/utils/url.c，+1/-1 行）。",
    "patch": "patches/8a6e53e5231354b52feaffc02eae48204303157d.patch"
   },
   {
@@ -145,20 +137,12 @@
     "cwe_name": "Out-of-bounds Read"
    },
    "location": {
-    "file": "src/utils/alloc.c",
-    "line": 170,
-    "function": "gf_strdup",
+    "file": "src/media_tools/webvtt.c",
+    "line": 1031,
+    "function": "gf_webvtt_parser_parse_internal",
     "stack": [
      {
-      "function": "gf_strdup",
-      "file": "src/utils/alloc.c"
-     },
-     {
       "function": "gf_webvtt_parser_parse_internal",
-      "file": "src/media_tools/webvtt.c"
-     },
-     {
-      "function": "gf_webvtt_parser_parse",
       "file": "src/media_tools/webvtt.c"
      },
      {
@@ -180,19 +164,15 @@
      {
       "function": "gf_fs_run",
       "file": "src/filter_core/filter_session.c"
-     },
-     {
-      "function": "gf_webvtt_parser_parse_internal",
-      "file": "src/media_tools/webvtt.c"
      }
     ]
    },
    "code_snippet": {
     "before": "\nGF_Err gf_webvtt_parser_parse_internal(GF_WebVTTParser *parser, GF_WebVTTCue *cue)\n{\n\tchar szLine[2048];\n\tchar *sOK;\n\tu32 len;\n\tGF_Err e;",
     "after": "\nGF_Err gf_webvtt_parser_parse_internal(GF_WebVTTParser *parser, GF_WebVTTCue *cue)\n{\n\tchar szLine[2049];\n\tchar *sOK;\n\tu32 len;\n\tGF_Err e;",
-    "fix_summary": "gf_strdup：fixed potential crash parsing broken vtt files（+1/-1 行，2 个 hunk）"
+    "fix_summary": "gf_webvtt_parser_parse_internal：fixed potential crash parsing broken vtt files（+1/-1 行，2 个 hunk）"
    },
-   "description": "`src/utils/alloc.c:170`（`gf_strdup`）：Stack-buffer-overflow READ {*}。PoC 经 `gf_webvtt_parser_parse_internal` → `gf_strdup` 进入，栈深 9 帧；修复为 fixed potential crash parsing broken vtt files（src/media_tools/webvtt.c，+1/-1 行）。",
+   "description": "`src/media_tools/webvtt.c:1031`（`gf_webvtt_parser_parse_internal`）：Stack-buffer-overflow READ {*}。PoC 经 `txtin_process_webvtt` → `gf_webvtt_parser_parse_internal` 进入，栈深 6 帧；修复为 fixed potential crash parsing broken vtt files（src/media_tools/webvtt.c，+1/-1 行）。",
    "patch": "patches/4786c169258fcf4adfeafe03e09c1f214c0d09cf.patch"
   },
   {
@@ -204,7 +184,7 @@
    },
    "location": {
     "file": "src/media_tools/av_parsers.c",
-    "line": 11638,
+    "line": 11635,
     "function": "vvc_get_ctb_info_in_slice",
     "stack": [
      {
@@ -254,7 +234,7 @@
     "after": "\t\t\tu32 min_ctby=0;\n\t\t\tu32 max_ctby=0;\n\n\t\t\tif (tileY>=VVC_MAX_TILE_ROWS) return -1;\n\t\t\tif (tileX>=VVC_MAX_TILE_COLS) return -1;\n\n\t\t\tfor (i=0; i<tileY; i++) min_ctby += si->pps->tile_rows_height_ctb[i];\n\t\t\tmax_ctby = min_ctby + si->pps->tile_rows_height_ctb[i];\n",
     "fix_summary": "vvc_get_ctb_info_in_slice：fixed possible crash in vvc tile parsing of corrupted streams（+3/-0 行，2 个 hunk）"
    },
-   "description": "`src/media_tools/av_parsers.c:11638`（`vvc_get_ctb_info_in_slice`）：Index-out-of-bounds。PoC 经 `vvc_get_num_entry_points` → `vvc_get_ctb_info_in_slice` 进入，栈深 10 帧；修复为 fixed possible crash in vvc tile parsing of corrupted streams（src/media_tools/av_parsers.c，+3/-0 行）。",
+   "description": "`src/media_tools/av_parsers.c:11635`（`vvc_get_ctb_info_in_slice`）：Index-out-of-bounds。PoC 经 `vvc_get_num_entry_points` → `vvc_get_ctb_info_in_slice` 进入，栈深 10 帧；修复为 fixed possible crash in vvc tile parsing of corrupted streams（src/media_tools/av_parsers.c，+3/-0 行）。",
    "patch": "patches/170631255f5504243b34323d61edb60b2dfbce51.patch"
   },
   {
@@ -296,10 +276,6 @@
      {
       "function": "gf_fs_run",
       "file": "src/filter_core/filter_session.c"
-     },
-     {
-      "function": "gf_sdp_info_parse",
-      "file": "src/ietf/sdp.c"
      }
     ]
    },
@@ -308,7 +284,7 @@
     "after": "s32 gf_token_get_line(const char *Buffer, u32 Start, u32 Size, char *LineBuffer, u32 LineBufferSize)\n{\n\tu32 offset;\n\ts32 End, Total;\n\tLineBuffer[0] = 0;\n\tif (Start >= Size) return -1;\n",
     "fix_summary": "gf_token_get_line：fixed potential overflow in token read with broken sdp（+1/-1 行，2 个 hunk）"
    },
-   "description": "`src/utils/token.c:105`（`gf_token_get_line`）：Stack-buffer-overflow WRITE 1。PoC 经 `gf_sdp_info_parse` → `gf_token_get_line` 进入，栈深 8 帧；修复为 fixed potential overflow in token read with broken sdp（src/utils/token.c，+1/-1 行）。",
+   "description": "`src/utils/token.c:105`（`gf_token_get_line`）：Stack-buffer-overflow WRITE 1。PoC 经 `gf_sdp_info_parse` → `gf_token_get_line` 进入，栈深 7 帧；修复为 fixed potential overflow in token read with broken sdp（src/utils/token.c，+1/-1 行）。",
    "patch": "patches/067bef9548698847fe9126308626e672e1ecab75.patch"
   },
   {
@@ -320,7 +296,7 @@
    },
    "location": {
     "file": "src/media_tools/av_parsers.c",
-    "line": 7086,
+    "line": 7084,
     "function": "hevc_parse_short_term_ref_pic_set",
     "stack": [
      {
@@ -366,7 +342,7 @@
     "after": "\t\t\t}\n\t\t\tif ((ref_idc == 1) || (ref_idc == 2)) {\n\t\t\t\ts32 deltaPOC = deltaRPS;\n\t\t\t\tif ((i < nb_ref_pics) && (i<16))\n\t\t\t\t\tdeltaPOC += ref_ps->delta_poc[i];\n\n\t\t\t\tif (k<16)\n\t\t\t\t\trps->delta_poc[k] = deltaPOC;\n\n\t\t\t\tif (deltaPOC < 0)  k0++;\n\t\t\t\telse k1++;",
     "fix_summary": "hevc_parse_short_term_ref_pic_set：fixed index out of band in hevc ref pics with broken streams（+3/-2 行）"
    },
-   "description": "`src/media_tools/av_parsers.c:7086`（`hevc_parse_short_term_ref_pic_set`）：Index-out-of-bounds。PoC 经 `gf_hevc_read_sps_bs_internal` → `hevc_parse_short_term_ref_pic_set` 进入，栈深 9 帧；修复为 fixed index out of band in hevc ref pics with broken streams（src/media_tools/av_parsers.c，+3/-2 行）。",
+   "description": "`src/media_tools/av_parsers.c:7084`（`hevc_parse_short_term_ref_pic_set`）：Index-out-of-bounds。PoC 经 `gf_hevc_read_sps_bs_internal` → `hevc_parse_short_term_ref_pic_set` 进入，栈深 9 帧；修复为 fixed index out of band in hevc ref pics with broken streams（src/media_tools/av_parsers.c，+3/-2 行）。",
    "patch": "patches/14ecc478ad48b4df8b0892a7f25cae90a714f059.patch"
   },
   {
@@ -428,12 +404,16 @@
    },
    "location": {
     "file": "src/utils/os_net.c",
-    "line": 1766,
+    "line": 1895,
     "function": "gf_sk_connect",
     "stack": [
      {
       "function": "gf_sk_connect",
       "file": "src/utils/os_net.c"
+     },
+     {
+      "function": "sockin_initialize",
+      "file": "src/filters/in_sock.c"
      },
      {
       "function": "gf_filter_new_finalize",
@@ -466,10 +446,6 @@
      {
       "function": "gf_fs_thread_proc",
       "file": "src/filter_core/filter_session.c"
-     },
-     {
-      "function": "gf_fs_run",
-      "file": "src/filter_core/filter_session.c"
      }
     ]
    },
@@ -478,7 +454,7 @@
     "after": "\t\t\t\tgf_sk_set_block_mode(sock, GF_TRUE);\n\t\t}\n\t\tserver_add.sun_family = AF_UNIX;\n\t\tstrncpy(server_add.sun_path, PeerName, sizeof(server_add.sun_path));\n\t\tif (connect(sock->socket, (struct sockaddr *)&server_add, sizeof(struct sockaddr_un)) < 0) {\n\t\t\tGF_LOG(GF_LOG_ERROR, GF_LOG_NETWORK, (\"[Socket] Failed to connect unix domain socket to %s\\n\", PeerName));\n\t\t\treturn GF_IP_CONNECTION_FAILURE;",
     "fix_summary": "gf_sk_connect：fixed potential crash in unix domain sockets with broken adresses（+1/-1 行，2 个 hunk）"
    },
-   "description": "`src/utils/os_net.c:1766`（`gf_sk_connect`）：Stack-buffer-overflow WRITE {*}。PoC 经 `gf_filter_new_finalize` → `gf_sk_connect` 进入，栈深 10 帧；修复为 fixed potential crash in unix domain sockets with broken adresses（src/utils/os_net.c，+1/-1 行）。",
+   "description": "`src/utils/os_net.c:1895`（`gf_sk_connect`）：Stack-buffer-overflow WRITE {*}。PoC 经 `sockin_initialize` → `gf_sk_connect` 进入，栈深 10 帧；修复为 fixed potential crash in unix domain sockets with broken adresses（src/utils/os_net.c，+1/-1 行）。",
    "patch": "patches/0ff40625b602590afffb383ab03d155e0ba509ed.patch"
   },
   {
@@ -490,7 +466,7 @@
    },
    "location": {
     "file": "src/filter_core/filter_props.c",
-    "line": 1017,
+    "line": 1019,
     "function": "gf_props_assign_value",
     "stack": [
      {
@@ -507,10 +483,6 @@
      },
      {
       "function": "gf_filter_pid_set_property_full",
-      "file": "src/filter_core/filter_pid.c"
-     },
-     {
-      "function": "gf_filter_pid_set_property",
       "file": "src/filter_core/filter_pid.c"
      },
      {
@@ -532,6 +504,10 @@
      {
       "function": "gf_fs_thread_proc",
       "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
      }
     ]
    },
@@ -540,7 +516,7 @@
     "after": "\t\t\tif (sep_desc) {\n\t\t\t\tGF_Err e;\n\t\t\t\tpic_size = (u32) ( (sep_desc + 1) - buf);\n\t\t\t\tif (fsize>pic_size) {\n\t\t\t\t\tpic_size = fsize - pic_size;\n\n\t\t\t\t\tif (video_pid_p) {\n\t\t\t\t\t\te = gf_filter_pid_raw_new(filter, NULL, NULL, buf+1, NULL, sep_desc+1, pic_size, GF_FALSE, video_pid_p);\n\t\t\t\t\t\tif (e) {\n\t\t\t\t\t\t\tGF_LOG(GF_LOG_ERROR, GF_LOG_MEDIA, (\"[MP3Dmx] error setting up video pid for cover art: %s\\n\", gf_error_to_string(e) ));\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (*video_pid_p) {\n\t\t\t\t\t\t\tu8 *out_buffer;\n\t\t\t\t\t\t\tGF_FilterPacket *dst_pck;\n\t\t\t\t\t\t\tgf_filter_pid_set_name(*video_pid_p, \"CoverArt\");\n\t\t\t\t\t\t\tgf_filter_pid_set_property(*video_pid_p, GF_PROP_PID_COVER_ART, &PROP_BOOL(GF_TRUE));\n\t\t\t\t\t\t\tdst_pck = gf_filter_pck_new_alloc(*video_pid_p, pic_size, &out_buffer);\n\t\t\t\t\t\t\tif (dst_pck) {\n\t\t\t\t\t\t\t\tgf_filter_pck_set_framing(dst_pck, GF_TRUE, GF_TRUE);\n\t\t\t\t\t\t\t\tmemcpy(out_buffer, sep_desc+1, pic_size);\n\t\t\t\t\t\t\t\tgf_filter_pck_send(dst_pck);\n\t\t\t\t\t\t\t}\n\n\t\t\t\t\t\t\tgf_filter_pid_set_eos(*video_pid_p);\n\t\t\t\t\t\t}\n\t\t\t\t\t} else {\n\t\t\t\t\t\tgf_filter_pid_set_property(audio_pid, GF_PROP_PID_COVER_ART, &PROP_DATA(sep_desc+1, pic_size) );\n\t\t\t\t\t}\n\t\t\t\t} else {\n\t\t\t\t\tGF_LOG(GF_LOG_ERROR, GF_LOG_MEDIA, (\"[MP3Dmx] Corrupted cover art, ignoring\\n\"));\n\t\t\t\t}\n\t\t\t}\n\t\t} else if (tag_idx>=0) {",
     "fix_summary": "gf_props_assign_value：fixed possible crash parsing cover art in broken id3tag（+23/-19 行）"
    },
-   "description": "`src/filter_core/filter_props.c:1017`（`gf_props_assign_value`）：Heap-buffer-overflow READ {*}。PoC 经 `gf_props_insert_property` → `gf_props_assign_value` 进入，栈深 10 帧；修复为 fixed possible crash parsing cover art in broken id3tag（src/filters/reframe_mp3.c，+23/-19 行）。",
+   "description": "`src/filter_core/filter_props.c:1019`（`gf_props_assign_value`）：Heap-buffer-overflow READ {*}。PoC 经 `gf_props_insert_property` → `gf_props_assign_value` 进入，栈深 10 帧；修复为 fixed possible crash parsing cover art in broken id3tag（src/filters/reframe_mp3.c，+23/-19 行）。",
    "patch": "patches/593d9afa9db74a83909c4c1f1d27c9f4289e96c7.patch"
   },
   {
@@ -570,30 +546,6 @@
      {
       "function": "gf_fs_run",
       "file": "src/filter_core/filter_session.c"
-     },
-     {
-      "function": "gf_realloc",
-      "file": "src/utils/alloc.c"
-     },
-     {
-      "function": "mpgviddmx_process",
-      "file": "src/filters/reframe_mpgvid.c"
-     },
-     {
-      "function": "gf_filter_process_task",
-      "file": "src/filter_core/filter.c"
-     },
-     {
-      "function": "gf_fs_thread_proc",
-      "file": "src/filter_core/filter_session.c"
-     },
-     {
-      "function": "gf_fs_run",
-      "file": "src/filter_core/filter_session.c"
-     },
-     {
-      "function": "gf_realloc",
-      "file": "src/utils/alloc.c"
      }
     ]
    },
@@ -602,7 +554,7 @@
     "after": "\t\t//we have some potential bytes of a start code in the store, copy some more bytes and check if valid start code.\n\t\t//if not, dispatch these bytes as continuation of the data\n\t\tif (ctx->bytes_in_header) {\n\t\t\t//the two zones may overlap\n\t\t\tmemmove(ctx->hdr_store + ctx->bytes_in_header, start, MIN_HDR_STORE - ctx->bytes_in_header);\n\t\t\tcurrent = mpgviddmx_next_start_code(ctx->hdr_store, MIN_HDR_STORE);\n\n\t\t\t//no start code in stored buffer",
     "fix_summary": "mpgviddmx_process：fixed possible memcpy overlap in rfmpegvid（+2/-2 行）"
    },
-   "description": "`src/filters/reframe_mpgvid.c:739`（`mpgviddmx_process`）：Memcpy-param-overlap。PoC 经 `gf_filter_process_task` → `mpgviddmx_process` 进入，栈深 10 帧；修复为 fixed possible memcpy overlap in rfmpegvid（src/filters/reframe_mpgvid.c，+2/-2 行）。",
+   "description": "`src/filters/reframe_mpgvid.c:739`（`mpgviddmx_process`）：Memcpy-param-overlap。PoC 经 `gf_filter_process_task` → `mpgviddmx_process` 进入，栈深 4 帧；修复为 fixed possible memcpy overlap in rfmpegvid（src/filters/reframe_mpgvid.c，+2/-2 行）。",
    "patch": "patches/25ca355f14a28baeb6afd911ca7ae66deb37a1ac.patch"
   },
   {
@@ -676,7 +628,7 @@
    },
    "location": {
     "file": "src/ietf/sdp.c",
-    "line": 613,
+    "line": 619,
     "function": "gf_sdp_info_parse",
     "stack": [
      {
@@ -710,7 +662,7 @@
     "after": "\n\tif (e == GF_OK) e = rtpin_setup_sdp(rtp, sdp, stream);\n\n\tif (!gf_list_count(rtp->streams) && !e)\n\t\te = GF_NOT_SUPPORTED;\n\n\tif (e != GF_OK) {",
     "fix_summary": "gf_sdp_info_parse：fixed potential crash in broken sdp parsing（+1/-1 行，5 个 hunk）"
    },
-   "description": "`src/ietf/sdp.c:613`（`gf_sdp_info_parse`）：Index-out-of-bounds。PoC 经 `rtpin_load_sdp` → `gf_sdp_info_parse` 进入，栈深 6 帧；修复为 fixed potential crash in broken sdp parsing（src/filters/in_rtp_sdp.c, src/ietf/sdp.c, src/utils/token.c，+1/-1 行）。",
+   "description": "`src/ietf/sdp.c:619`（`gf_sdp_info_parse`）：Index-out-of-bounds。PoC 经 `rtpin_load_sdp` → `gf_sdp_info_parse` 进入，栈深 6 帧；修复为 fixed potential crash in broken sdp parsing（src/filters/in_rtp_sdp.c, src/ietf/sdp.c, src/utils/token.c，+1/-1 行）。",
    "patch": "patches/3e71b0ddc8632b8eea4424a4facb09e47ea353ba.patch"
   },
   {
@@ -722,7 +674,7 @@
    },
    "location": {
     "file": "src/media_tools/m3u8.c",
-    "line": 1257,
+    "line": 1255,
     "function": "gf_m3u8_parse_sub_playlist",
     "stack": [
      {
@@ -730,12 +682,12 @@
       "file": "src/media_tools/m3u8.c"
      },
      {
-      "function": "gf_m3u8_parse_master_playlist",
-      "file": "src/media_tools/m3u8.c"
-     },
-     {
       "function": "gf_m3u8_to_mpd",
       "file": "src/media_tools/mpd.c"
+     },
+     {
+      "function": "gf_dash_open",
+      "file": "src/media_tools/dash_client.c"
      },
      {
       "function": "dashdmx_configure_pid",
@@ -756,14 +708,6 @@
      {
       "function": "gf_fs_run",
       "file": "src/filter_core/filter_session.c"
-     },
-     {
-      "function": "gf_calloc",
-      "file": "src/utils/alloc.c"
-     },
-     {
-      "function": "extract_attributes",
-      "file": "src/media_tools/m3u8.c"
      }
     ]
    },
@@ -772,7 +716,7 @@
     "after": "\tif (!safe_start_equals(name, line))\n\t\treturn NULL;\n\tret = gf_calloc((num_attributes + 1), sizeof(char*));\n\tif (!ret) return NULL;\n\tif (!num_attributes) return ret;\n\t\n\tcurr_attribute = 0;\n\tfor (i=start; i<=len; i++) {\n\t\tif (line[i] == '\\0' || (!quote && line[i] == ',')  || (line[i] == quote)) {",
     "fix_summary": "gf_m3u8_parse_sub_playlist：fixed possible heap iverflow with broken m3u8 parsing（+3/-0 行，2 个 hunk）"
    },
-   "description": "`src/media_tools/m3u8.c:1257`（`gf_m3u8_parse_sub_playlist`）：Heap-buffer-overflow READ 8。PoC 经 `gf_m3u8_parse_master_playlist` → `gf_m3u8_parse_sub_playlist` 进入，栈深 10 帧；修复为 fixed possible heap iverflow with broken m3u8 parsing（src/media_tools/m3u8.c，+3/-0 行）。",
+   "description": "`src/media_tools/m3u8.c:1255`（`gf_m3u8_parse_sub_playlist`）：Heap-buffer-overflow READ 8。PoC 经 `gf_m3u8_to_mpd` → `gf_m3u8_parse_sub_playlist` 进入，栈深 8 帧；修复为 fixed possible heap iverflow with broken m3u8 parsing（src/media_tools/m3u8.c，+3/-0 行）。",
    "patch": "patches/964e268f0bf975b881f322ff6d9dd53957fa837d.patch"
   },
   {
@@ -802,26 +746,6 @@
      {
       "function": "gf_fs_run",
       "file": "src/filter_core/filter_session.c"
-     },
-     {
-      "function": "gf_realloc",
-      "file": "src/utils/alloc.c"
-     },
-     {
-      "function": "mp3_dmx_process",
-      "file": "src/filters/reframe_mp3.c"
-     },
-     {
-      "function": "gf_filter_process_task",
-      "file": "src/filter_core/filter.c"
-     },
-     {
-      "function": "gf_fs_thread_proc",
-      "file": "src/filter_core/filter_session.c"
-     },
-     {
-      "function": "gf_fs_run",
-      "file": "src/filter_core/filter_session.c"
      }
     ]
    },
@@ -830,7 +754,7 @@
     "after": "\n\n\t\t//ready to send packet\n\t\tif (size + 3 < remain-bytes_skipped) {\n\t\t\t//make sure we are sync!\n\t\t\tif (sync[size] !=0xFF) {\n\t\t\t\tif ((sync[size]=='T') && (sync[size+1]=='A') && (sync[size+2]=='G')) {",
     "fix_summary": "mp3_dmx_process：fixed possible heap overfow in mp3 reframer（+1/-1 行）"
    },
-   "description": "`src/filters/reframe_mp3.c:645`（`mp3_dmx_process`）：Heap-buffer-overflow READ 1。PoC 经 `gf_filter_process_task` → `mp3_dmx_process` 进入，栈深 9 帧；修复为 fixed possible heap overfow in mp3 reframer（src/filters/reframe_mp3.c，+1/-1 行）。",
+   "description": "`src/filters/reframe_mp3.c:645`（`mp3_dmx_process`）：Heap-buffer-overflow READ 1。PoC 经 `gf_filter_process_task` → `mp3_dmx_process` 进入，栈深 4 帧；修复为 fixed possible heap overfow in mp3 reframer（src/filters/reframe_mp3.c，+1/-1 行）。",
    "patch": "patches/17d14c6a4f2c3f904a2065a07ef3ae915f78c2df.patch"
   },
   {
@@ -868,22 +792,6 @@
      {
       "function": "gf_fs_run",
       "file": "src/filter_core/filter_session.c"
-     },
-     {
-      "function": "gf_free",
-      "file": "src/utils/alloc.c"
-     },
-     {
-      "function": "ogg_stream_clear",
-      "file": "src/media_tools/gpac_ogg.c"
-     },
-     {
-      "function": "oggdmx_check_dur",
-      "file": "src/filters/dmx_ogg.c"
-     },
-     {
-      "function": "oggdmx_process",
-      "file": "src/filters/dmx_ogg.c"
      }
     ]
    },
@@ -892,7 +800,7 @@
     "after": "\t\tif (ogg_page_bos(&oggpage)) {\n\t\t\togg_stream_init(&os, ogg_page_serialno(&oggpage));\n\t\t\tif (ogg_stream_pagein(&os, &oggpage) >= 0 ) {\n\t\t\t\tif (ogg_stream_packetpeek(&os, &oggpacket)>0) {\n\t\t\t\t\tif (ogg_stream_pagein(&os, &oggpage) >= 0 ) {\n\t\t\t\t\t\togg_stream_packetpeek(&os, &oggpacket);\n\t\t\t\t\t\toggdmx_get_stream_info(&oggpacket, &info);\n\t\t\t\t\t}\n\t\t\t\t\tif (!has_stream) {\n\t\t\t\t\t\thas_stream = GF_TRUE;\n\t\t\t\t\t\togg_stream_init(&the_os, ogg_page_serialno(&oggpage));\n\t\t\t\t\t\tthe_info = info;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\togg_stream_clear(&os);",
     "fix_summary": "oggdmx_get_stream_info：fixed possible use after free in broken ogg streams（+10/-9 行）"
    },
-   "description": "`src/filters/dmx_ogg.c:132`（`oggdmx_get_stream_info`）：Heap-use-after-free READ 1。PoC 经 `oggdmx_check_dur` → `oggdmx_get_stream_info` 进入，栈深 10 帧；修复为 fixed possible use after free in broken ogg streams（src/filters/dmx_ogg.c，+10/-9 行）。",
+   "description": "`src/filters/dmx_ogg.c:132`（`oggdmx_get_stream_info`）：Heap-use-after-free READ 1。PoC 经 `oggdmx_check_dur` → `oggdmx_get_stream_info` 进入，栈深 6 帧；修复为 fixed possible use after free in broken ogg streams（src/filters/dmx_ogg.c，+10/-9 行）。",
    "patch": "patches/fe46265eda4375086374ed41a4bb7f3906ced4ca.patch"
   },
   {
@@ -904,7 +812,7 @@
    },
    "location": {
     "file": "src/media_tools/av_parsers.c",
-    "line": 7140,
+    "line": 7138,
     "function": "hevc_pred_weight_table",
     "stack": [
      {
@@ -950,7 +858,7 @@
     "after": "\tu8 luma_weights[20], chroma_weights[20];\n\tu32 ChromaArrayType = sps->separate_colour_plane_flag ? 0 : sps->chroma_format_idc;\n\n\tnum_ref_idx = num_ref_idx_l0_active < 20 ? num_ref_idx_l0_active : 19 ;\n\n\tgf_bs_read_ue_log(bs, \"luma_log2_weight_denom\");\n\tif (ChromaArrayType != 0)",
     "fix_summary": "hevc_pred_weight_table：fix array overflow on hevc weights（+1/-1 行，2 个 hunk）"
    },
-   "description": "`src/media_tools/av_parsers.c:7140`（`hevc_pred_weight_table`）：Index-out-of-bounds。PoC 经 `hevc_parse_slice_segment` → `hevc_pred_weight_table` 进入，栈深 9 帧；修复为 fix array overflow on hevc weights（src/media_tools/av_parsers.c，+1/-1 行）。",
+   "description": "`src/media_tools/av_parsers.c:7138`（`hevc_pred_weight_table`）：Index-out-of-bounds。PoC 经 `hevc_parse_slice_segment` → `hevc_pred_weight_table` 进入，栈深 9 帧；修复为 fix array overflow on hevc weights（src/media_tools/av_parsers.c，+1/-1 行）。",
    "patch": "patches/a793966c6f4b11ad495d5fbca12f01ae787c767f.patch"
   },
   {
@@ -996,10 +904,6 @@
      {
       "function": "gf_fs_run",
       "file": "src/filter_core/filter_session.c"
-     },
-     {
-      "function": "txtin_probe_duration",
-      "file": "src/filters/load_text.c"
      }
     ]
    },
@@ -1008,7 +912,7 @@
     "after": "\t\t\t\t}\n\t\t\t\t/*UTF8 3 bytes char*/\n\t\t\t\telse if ( (szLine[i] & 0xf0) == 0xe0) {\n\t\t\t\t\tif (j+1 >= GF_ARRAY_LENGTH(szLineConv) || i+1 >= len)\n\t\t\t\t\t\tbreak;\n\t\t\t\t\tszLineConv[j] = szLine[i];\n\t\t\t\t\ti++;",
     "fix_summary": "gf_text_get_utf8_line：fix buffer overflow on utf8 conversion（+1/-1 行，2 个 hunk）"
    },
-   "description": "`src/filters/load_text.c:371`（`gf_text_get_utf8_line`）：Stack-buffer-overflow READ 1。PoC 经 `txtin_probe_duration` → `gf_text_get_utf8_line` 进入，栈深 9 帧；修复为 fix buffer overflow on utf8 conversion（src/filters/load_text.c，+1/-1 行）。",
+   "description": "`src/filters/load_text.c:371`（`gf_text_get_utf8_line`）：Stack-buffer-overflow READ 1。PoC 经 `txtin_probe_duration` → `gf_text_get_utf8_line` 进入，栈深 8 帧；修复为 fix buffer overflow on utf8 conversion（src/filters/load_text.c，+1/-1 行）。",
    "patch": "patches/a616b4fa0a73ff57eff65fcc6beba6b79260a4fd.patch"
   },
   {
@@ -1020,7 +924,7 @@
    },
    "location": {
     "file": "src/filter_core/filter.c",
-    "line": 1048,
+    "line": 1049,
     "function": "filter_solve_prop_template",
     "stack": [
      {
@@ -1070,7 +974,7 @@
     "after": "\tif (sep && ((sep[5]==sess->sep_args) || (sep[5]==0)))\n\t\treturn sep;\n\t//for local files, check if file/dir exists for each ':' specified\n\t//this allows for file path with ':'\n\tif (!strncmp(path, \"file://\", 7) || !strstr(path, \"://\")) {\n\t\tsep = (char*)res;\n\t\twhile (1) {",
     "fix_summary": "filter_solve_prop_template：fix buffer overflow on strcpy（+1/-1 行，4 个 hunk）"
    },
-   "description": "`src/filter_core/filter.c:1048`（`filter_solve_prop_template`）：Stack-buffer-overflow WRITE {*}。PoC 经 `gf_filter_parse_prop_solve_env_var` → `filter_solve_prop_template` 进入，栈深 10 帧；修复为 fix buffer overflow on strcpy（src/filter_core/filter.c，+1/-1 行）。",
+   "description": "`src/filter_core/filter.c:1049`（`filter_solve_prop_template`）：Stack-buffer-overflow WRITE {*}。PoC 经 `gf_filter_parse_prop_solve_env_var` → `filter_solve_prop_template` 进入，栈深 10 帧；修复为 fix buffer overflow on strcpy（src/filter_core/filter.c，+1/-1 行）。",
    "patch": "patches/523f9e5bb8a7a6e82977f8e7c3cf20ee039edfdd.patch"
   },
   {
@@ -1081,24 +985,16 @@
     "cwe_name": "Out-of-bounds Read"
    },
    "location": {
-    "file": "src/utils/alloc.c",
-    "line": 170,
-    "function": "gf_strdup",
+    "file": "src/media_tools/m3u8.c",
+    "line": 722,
+    "function": "parse_attributes",
     "stack": [
-     {
-      "function": "gf_strdup",
-      "file": "src/utils/alloc.c"
-     },
      {
       "function": "parse_attributes",
       "file": "src/media_tools/m3u8.c"
      },
      {
       "function": "gf_m3u8_parse_sub_playlist",
-      "file": "src/media_tools/m3u8.c"
-     },
-     {
-      "function": "gf_m3u8_parse_master_playlist",
       "file": "src/media_tools/m3u8.c"
      },
      {
@@ -1124,15 +1020,19 @@
      {
       "function": "gf_fs_thread_proc",
       "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
+      "file": "src/filter_core/filter_session.c"
      }
     ]
    },
    "code_snippet": {
     "before": "\t\t\t\t} else {\n\t\t\t\t\tGF_LOG(GF_LOG_WARNING, GF_LOG_DASH,(\"[M3U8] Misformed #EXT-X-MEDIA:LANGUAGE=%s. Quotes are incorrect.\\n\", ret[i]+5));\n\t\t\t\t}\n\t\t\t} else if (safe_start_equals(\"NAME=\", ret[i])) {\n\t\t\t\tif (attributes->name) gf_free(attributes->name);\n\t\t\t\tattributes->name = gf_strdup(ret[i]+5+1);\n\t\t\t\tu32 len = (u32) strlen(attributes->name);",
     "after": "\t\t\t\t} else {\n\t\t\t\t\tGF_LOG(GF_LOG_WARNING, GF_LOG_DASH,(\"[M3U8] Misformed #EXT-X-MEDIA:LANGUAGE=%s. Quotes are incorrect.\\n\", ret[i]+5));\n\t\t\t\t}\n\t\t\t} else if (safe_start_equals(\"NAME=\\\"\", ret[i])) {\n\t\t\t\tif (attributes->name) gf_free(attributes->name);\n\t\t\t\tattributes->name = gf_strdup(ret[i]+5+1);\n\t\t\t\tu32 len = (u32) strlen(attributes->name);",
-    "fix_summary": "gf_strdup：fixed possible heap overflow when parsing broken m3u8（+1/-1 行）"
+    "fix_summary": "parse_attributes：fixed possible heap overflow when parsing broken m3u8（+1/-1 行）"
    },
-   "description": "`src/utils/alloc.c:170`（`gf_strdup`）：Heap-buffer-overflow READ 1。PoC 经 `parse_attributes` → `gf_strdup` 进入，栈深 10 帧；修复为 fixed possible heap overflow when parsing broken m3u8（src/media_tools/m3u8.c，+1/-1 行）。",
+   "description": "`src/media_tools/m3u8.c:722`（`parse_attributes`）：Heap-buffer-overflow READ 1。PoC 经 `gf_m3u8_parse_sub_playlist` → `parse_attributes` 进入，栈深 9 帧；修复为 fixed possible heap overflow when parsing broken m3u8（src/media_tools/m3u8.c，+1/-1 行）。",
    "patch": "patches/58449f859fed66444122465519f03bc3fcc97382.patch"
   },
   {
@@ -1166,26 +1066,6 @@
      {
       "function": "gf_fs_run",
       "file": "src/filter_core/filter_session.c"
-     },
-     {
-      "function": "gf_malloc",
-      "file": "src/utils/alloc.c"
-     },
-     {
-      "function": "mpgviddmx_check_pid",
-      "file": "src/filters/reframe_mpgvid.c"
-     },
-     {
-      "function": "mpgviddmx_process",
-      "file": "src/filters/reframe_mpgvid.c"
-     },
-     {
-      "function": "gf_filter_process_task",
-      "file": "src/filter_core/filter.c"
-     },
-     {
-      "function": "gf_fs_thread_proc",
-      "file": "src/filter_core/filter_session.c"
      }
     ]
    },
@@ -1194,7 +1074,7 @@
     "after": "\t\t\tchar *frame = dcfg;\n\t\t\twhile ((i+3<vosh_size)  && ((frame[i]!=0) || (frame[i+1]!=0) || (frame[i+2]!=1))) i++;\n\t\t\tif (i+4>=vosh_size) break;\n\t\t\tif (i+8 < vosh_size && strncmp(frame+i+4, \"DivX\", 4)) {\n\t\t\t\ti += 4;\n\t\t\t\tcontinue;\n\t\t\t}",
     "fix_summary": "mpgviddmx_check_pid：fix string reading overflow in mpgviddmx（+1/-1 行）"
    },
-   "description": "`src/filters/reframe_mpgvid.c:428`（`mpgviddmx_check_pid`）：Heap-buffer-overflow READ 2。PoC 经 `mpgviddmx_process` → `mpgviddmx_check_pid` 进入，栈深 10 帧；修复为 fix string reading overflow in mpgviddmx（src/filters/reframe_mpgvid.c，+1/-1 行）。",
+   "description": "`src/filters/reframe_mpgvid.c:428`（`mpgviddmx_check_pid`）：Heap-buffer-overflow READ 2。PoC 经 `mpgviddmx_process` → `mpgviddmx_check_pid` 进入，栈深 5 帧；修复为 fix string reading overflow in mpgviddmx（src/filters/reframe_mpgvid.c，+1/-1 行）。",
    "patch": "patches/e95b4f1815c6e70a92953d464eab30c8457a9ad8.patch"
   },
   {
@@ -1206,7 +1086,7 @@
    },
    "location": {
     "file": "src/ietf/sdp.c",
-    "line": 625,
+    "line": 631,
     "function": "gf_sdp_info_parse",
     "stack": [
      {
@@ -1240,7 +1120,7 @@
     "after": "\t\t\twhile (1) {\n\t\t\t\tpos = gf_token_get(LineBuf, pos, \" \\t\\r\\n\", comp, 3000);\n\t\t\t\tif (pos <= 0) break;\n\t\t\t\tif (timing->NbZoneOffsets >= GF_SDP_MAX_TIMEOFFSET) break;\n\t\t\t\ttiming->AdjustmentTime[timing->NbZoneOffsets] = atoi(comp);\n\t\t\t\tpos = gf_token_get(LineBuf, pos, \" \\t\\r\\n\", comp, 3000);\n\t\t\t\ttiming->AdjustmentOffset[timing->NbZoneOffsets] = SDP_MakeSeconds(comp);\n\t\t\t\ttiming->NbZoneOffsets += 1;\n\t\t\t}\n\t\t\tbreak;\n\t\tcase 'k':",
     "fix_summary": "gf_sdp_info_parse：prevent Index-out-of-bounds in gf_sdp_info_parse（+1/-1 行）"
    },
-   "description": "`src/ietf/sdp.c:625`（`gf_sdp_info_parse`）：Index-out-of-bounds。PoC 经 `rtpin_load_sdp` → `gf_sdp_info_parse` 进入，栈深 6 帧；修复为 prevent Index-out-of-bounds in gf_sdp_info_parse（src/ietf/sdp.c，+1/-1 行）。",
+   "description": "`src/ietf/sdp.c:631`（`gf_sdp_info_parse`）：Index-out-of-bounds。PoC 经 `rtpin_load_sdp` → `gf_sdp_info_parse` 进入，栈深 6 帧；修复为 prevent Index-out-of-bounds in gf_sdp_info_parse（src/ietf/sdp.c，+1/-1 行）。",
    "patch": "patches/ecfe062ed5a110b1577eb1abf2342403b402b227.patch"
   },
   {
@@ -1313,10 +1193,14 @@
     "cwe_name": "Out-of-bounds Write"
    },
    "location": {
-    "file": "src/filter_core/filter.c",
-    "line": 2971,
-    "function": "gf_filter_process_task",
+    "file": "src/filters/reframe_img.c",
+    "line": 349,
+    "function": "img_process",
     "stack": [
+     {
+      "function": "img_process",
+      "file": "src/filters/reframe_img.c"
+     },
      {
       "function": "gf_filter_process_task",
       "file": "src/filter_core/filter.c"
@@ -1334,9 +1218,9 @@
    "code_snippet": {
     "before": "{\n\tGF_ReframeImgCtx *ctx = gf_filter_get_udta(filter);\n\tconst GF_PropertyValue *p;\n\t\n\tif (is_remove) {\n\t\tctx->ipid = NULL;\n\t\treturn GF_OK;",
     "after": "{\n\tGF_ReframeImgCtx *ctx = gf_filter_get_udta(filter);\n\tconst GF_PropertyValue *p;\n\n\tif (is_remove) {\n\t\tctx->ipid = NULL;\n\t\treturn GF_OK;",
-    "fix_summary": "gf_filter_process_task：reframe_img: add int overflow check on image dimensions（+1/-1 行，5 个 hunk）"
+    "fix_summary": "img_process：reframe_img: add int overflow check on image dimensions（+1/-1 行，5 个 hunk）"
    },
-   "description": "`src/filter_core/filter.c:2971`（`gf_filter_process_task`）：UNKNOWN WRITE。PoC 经 `gf_fs_thread_proc` → `gf_filter_process_task` 进入，栈深 3 帧；修复为 reframe_img: add int overflow check on image dimensions（src/filters/reframe_img.c，+1/-1 行）。",
+   "description": "`src/filters/reframe_img.c:349`（`img_process`）：UNKNOWN WRITE。PoC 经 `gf_filter_process_task` → `img_process` 进入，栈深 4 帧；修复为 reframe_img: add int overflow check on image dimensions（src/filters/reframe_img.c，+1/-1 行）。",
    "patch": "patches/1337ebdfcb28204f39db2b464ed43434dd8623dd.patch"
   },
   {
@@ -1348,7 +1232,7 @@
    },
    "location": {
     "file": "src/media_tools/av_parsers.c",
-    "line": 9884,
+    "line": 9881,
     "function": "gf_opus_parse_packet_header",
     "stack": [
      {
@@ -1378,18 +1262,6 @@
      {
       "function": "gf_fs_run",
       "file": "src/filter_core/filter_session.c"
-     },
-     {
-      "function": "gf_malloc",
-      "file": "src/utils/alloc.c"
-     },
-     {
-      "function": "gf_filter_pck_new_alloc_internal",
-      "file": "src/filter_core/filter_pck.c"
-     },
-     {
-      "function": "gf_filter_pck_new_alloc",
-      "file": "src/filter_core/filter_pck.c"
      }
     ]
    },
@@ -1398,7 +1270,7 @@
     "after": "        return 0;\n    if (!header)\n        return 0;\n    if (data_length>=8 && !memcmp(data, \"OpusHead\", sizeof(char)*8))\n        return 0;\n    if (data_length>=8 && !memcmp(data, \"OpusTags\", sizeof(char)*8))\n        return 0;\n\n    GF_LOG(GF_LOG_DEBUG, GF_LOG_CODING, (\"Processing Opus packet, self: %d, size %d\\n\", self_delimited, data_length));",
     "fix_summary": "gf_opus_parse_packet_header：check data size in opus parse header（+2/-2 行）"
    },
-   "description": "`src/media_tools/av_parsers.c:9884`（`gf_opus_parse_packet_header`）：Heap-buffer-overflow READ 8。PoC 经 `gf_inspect_dump_opus_internal` → `gf_opus_parse_packet_header` 进入，栈深 10 帧；修复为 check data size in opus parse header（src/media_tools/av_parsers.c，+2/-2 行）。",
+   "description": "`src/media_tools/av_parsers.c:9881`（`gf_opus_parse_packet_header`）：Heap-buffer-overflow READ 8。PoC 经 `gf_inspect_dump_opus_internal` → `gf_opus_parse_packet_header` 进入，栈深 7 帧；修复为 check data size in opus parse header（src/media_tools/av_parsers.c，+2/-2 行）。",
    "patch": "patches/07c6c799e741a3a7466fc80964703e6f604f38e4.patch"
   },
   {
@@ -1430,10 +1302,6 @@
       "file": "src/media_tools/mpegts.c"
      },
      {
-      "function": "gf_m2ts_probe_data",
-      "file": "src/media_tools/mpegts.c"
-     },
-     {
       "function": "m2tsdmx_probe_data",
       "file": "src/filters/dmx_m2ts.c"
      },
@@ -1451,6 +1319,10 @@
      },
      {
       "function": "gf_fs_thread_proc",
+      "file": "src/filter_core/filter_session.c"
+     },
+     {
+      "function": "gf_fs_run",
       "file": "src/filter_core/filter_session.c"
      }
     ]
@@ -1498,22 +1370,6 @@
      {
       "function": "gf_fs_run",
       "file": "src/filter_core/filter_session.c"
-     },
-     {
-      "function": "gf_malloc",
-      "file": "src/utils/alloc.c"
-     },
-     {
-      "function": "gf_filter_pck_new_alloc_internal",
-      "file": "src/filter_core/filter_pck.c"
-     },
-     {
-      "function": "gf_filter_pck_new_alloc",
-      "file": "src/filter_core/filter_pck.c"
-     },
-     {
-      "function": "isor_sample_alloc",
-      "file": "src/filters/isoffin_read_ch.c"
      }
     ]
    },
@@ -1522,7 +1378,7 @@
     "after": "\t\t\t}\n\t\t}\n\t\twhile (size) {\n\t\t\tif (size < pctx->nalu_size_length) {\n\t\t\t\tinspect_printf(dump, \"   <!-- NALU is corrupted: nalu_size_length is %u but only %d remains -->\\n\", pctx->nalu_size_length, size);\n\t\t\t\tbreak;\n\t\t\t}\n\t\t\tu32 nal_size = inspect_get_nal_size((char*)data, pctx->nalu_size_length);\n\t\t\tdata += pctx->nalu_size_length;\n",
     "fix_summary": "inspect_get_nal_size：inspect: check size against nalu_size_length（+4/-0 行）"
    },
-   "description": "`src/filters/inspect.c:201`（`inspect_get_nal_size`）：Heap-buffer-overflow READ 1。PoC 经 `inspect_dump_packet` → `inspect_get_nal_size` 进入，栈深 10 帧；修复为 inspect: check size against nalu_size_length（src/filters/inspect.c，+4/-0 行）。",
+   "description": "`src/filters/inspect.c:201`（`inspect_get_nal_size`）：Heap-buffer-overflow READ 1。PoC 经 `inspect_dump_packet` → `inspect_get_nal_size` 进入，栈深 6 帧；修复为 inspect: check size against nalu_size_length（src/filters/inspect.c，+4/-0 行）。",
    "patch": "patches/5a83f50fe9a6cd513029e37cc723ae53c01807c3.patch"
   },
   {
@@ -1550,14 +1406,6 @@
       "file": "src/isomedia/box_funcs.c"
      },
      {
-      "function": "wvtt_box_read",
-      "file": "src/media_tools/webvtt.c"
-     },
-     {
-      "function": "gf_isom_box_read",
-      "file": "src/isomedia/box_funcs.c"
-     },
-     {
       "function": "gf_isom_box_parse_ex",
       "file": "src/isomedia/box_funcs.c"
      },
@@ -1567,10 +1415,6 @@
      },
      {
       "function": "gf_isom_parse_movie_boxes_internal",
-      "file": "src/isomedia/isom_intern.c"
-     },
-     {
-      "function": "gf_isom_parse_movie_boxes",
       "file": "src/isomedia/isom_intern.c"
      },
      {
@@ -1584,7 +1428,7 @@
     "after": "\t\t\td_stream.avail_out = (u32) (size - d_stream.total_out);\n\t\t\td_stream.next_out = (Bytef*) ( *uncompressed_data + d_stream.total_out);\n\t\t}\n\t\t*out_size = MIN( (size?size-1:0) , (u32) d_stream.total_out );\n\t\tinflateEnd(&d_stream);\n\t\t//force last byte to 0\n\t\t(*uncompressed_data)[*out_size] = 0;",
     "fix_summary": "gf_gz_decompress_payload_ex：gz_uncompress: add size check（+1/-1 行）"
    },
-   "description": "`src/utils/base_encoding.c:300`（`gf_gz_decompress_payload_ex`）：Heap-buffer-overflow WRITE 1。PoC 经 `gf_isom_box_parse_ex` → `gf_gz_decompress_payload_ex` 进入，栈深 10 帧；修复为 gz_uncompress: add size check（src/utils/base_encoding.c，+1/-1 行）。",
+   "description": "`src/utils/base_encoding.c:300`（`gf_gz_decompress_payload_ex`）：Heap-buffer-overflow WRITE 1。PoC 经 `gf_isom_box_parse_ex` → `gf_gz_decompress_payload_ex` 进入，栈深 7 帧；修复为 gz_uncompress: add size check（src/utils/base_encoding.c，+1/-1 行）。",
    "patch": "patches/ff627002687235bc6c585fc7ce24137cc6eeb73b.patch"
   }
  ]
